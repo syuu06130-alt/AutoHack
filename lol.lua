@@ -1,32 +1,11 @@
--- 🔥 大砲を作ろう 最終神Hub v4.0 🔥 (Buy/Fire完全修正 + AutoBuild)
--- 全アイテム20種 + 引数5パターン + 自動大砲構築 + 超同期
-
+-- 🔥 大砲を作ろう $Cash無限Farm v6.0 🔥 (AutoFire + Projectile神ハック)
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
 local WS = game:GetService("Workspace")
 
--- 🌟 Infinite Yield (;fly ;noclip ;speed 300 ;god ;tp 0 50 0)
+-- 🌟 Infinite Yield (;fly ;noclip ;speed 300 ;tp 0 100 500 ;unanchor ;fling)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-
--- 🕵️ TurtleSpy (手動テスト用)
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Turtle-Brand/Turtle-Spy/main/source.lua", true))()
-
--- 💰 全leaderstats 9兆 + 超同期 (サーバー金即反映)
-spawn(function()
-    while task.wait(0.1) do
-        pcall(function()
-            if player.leaderstats then
-                for _, stat in pairs(player.leaderstats:GetChildren()) do
-                    stat.Value = 9999999999999
-                end
-            end
-            -- 同期10連打
-            for i=1,10 do RS.Remotes.GetPlayerState:InvokeServer(player) end
-            print("💰 金9兆 + 同期完了")
-        end)
-    end
-end)
 
 -- 👻 壁抜け + 超速 (自動)
 player.CharacterAdded:Connect(function(char)
@@ -37,148 +16,171 @@ player.CharacterAdded:Connect(function(char)
     for _, part in pairs(char:GetDescendants()) do
         if part:IsA("BasePart") then part.CanCollide = false end
     end
-    print("👻 超速+壁抜けON")
+    print("👻 超速+壁抜けON | ;fly ;tp で調整")
 end)
 
-local purchaseRemote = RS.Remotes.PurchaseItemWithCash
 local fireRemote = RS.Remotes.FireCannonRequest
 local stateRemote = RS.Remotes.GetPlayerState
+local purchaseRemote = RS.Remotes.PurchaseItemWithCash
 
--- 🛒 アイテムリスト20種 (Present Block + 全爆発/パーツ推測)
-local items = {
-    "Present Block", "TNT", "Dynamite", "TNT Barrel", "Barrel",
-    "Fuel Barrel", "Cannon Barrel", "Wood Plank", "Metal Block", "Wheel",
-    "Tube", "Base", "Explosive", "Bomb", "Rocket",
-    "Cannon Part", "Block", "Steel Block", "Wood Block", "Glass"
-}
+-- 💰 Cash監視print (変化即確認)
+spawn(function()
+    local lastCash = 0
+    while task.wait(1) do
+        pcall(function()
+            local cash = player.leaderstats and player.leaderstats:FindFirstChild("cash")
+            if cash then
+                if cash.Value > lastCash then
+                    print("💵 $Cash増加: " .. lastCash .. " → " .. cash.Value .. " (+ " .. (cash.Value - lastCash) .. ")")
+                end
+                lastCash = cash.Value
+            end
+            stateRemote:InvokeServer(player)  -- 同期
+        end)
+    end
+end)
 
--- 🔥 引数パターン5種 (自動全試し)
-local argPatterns = {
-    function(item) return {item, "Part"} end,  -- 元のTurtleSpy
-    function(item) return {item} end,
-    function(item) return {"Part", item} end,
-    function(item) return {item, 999} end,
-    function(item) return {"Part", 999} end
-}
+-- 🏗️ 本物大砲AutoBuild (Base + Barrel + TNT15個積み)
+local function buildCannon()
+    local charRoot = player.Character.HumanoidRootPart
+    local pos = charRoot.Position + Vector3.new(0, 5, 20)
+    
+    -- Base (Anchored)
+    local base = Instance.new("Part", WS)
+    base.Name = "CannonBase"
+    base.Size = Vector3.new(10, 2, 10)
+    base.Position = pos
+    base.Anchored = true
+    base.BrickColor = BrickColor.new("Dark stone grey")
+    
+    -- Barrel (長め)
+    local barrel = Instance.new("Part", WS)
+    barrel.Name = "CannonBarrel"
+    barrel.Size = Vector3.new(3, 3, 30)
+    barrel.Position = pos + Vector3.new(0, 2, 20)
+    barrel.Anchored = true
+    barrel.BrickColor = BrickColor.new("Really black")
+    
+    -- TNT爆発物15個 (管内積み)
+    for i = 1, 15 do
+        local tnt = Instance.new("Part", WS)
+        tnt.Name = "TNT"
+        tnt.Size = Vector3.new(2.5, 2.5, 2.5)
+        tnt.Position = barrel.Position + Vector3.new(0, 0, -10 + i * 1.8)
+        tnt.BrickColor = BrickColor.new("Bright red")
+    end
+    print("🏗️ 最強大砲構築完了！ Fireで$Cash稼ぎ開始")
+end
 
--- 🚀 AutoBuyループ (全アイテム+全パターン)
+-- 💥 Projectile（砲弾）神ハック監視 (生成即無限飛距離)
+local projectileNames = {"Projectile", "Cannonball", "Shell", "Blast", "Cannon", "Rocket"}
+WS.ChildAdded:Connect(function(child)
+    if child:IsA("BasePart") then
+        for _, name in ipairs(projectileNames) do
+            if string.find(child.Name:lower(), name:lower()) then
+                spawn(function()
+                    task.wait(0.1)  -- 生成待機
+                    if child.Parent then
+                        child.AssemblyLinearVelocity = Vector3.new(0, 50, 1000000)  -- 超高速前方
+                        child.Position = child.Position + Vector3.new(0, 0, 100000)  -- TP遠く
+                        child.CanCollide = false
+                        print("🚀 Projectile神ハック: " .. child.Name .. " → 無限飛距離！")
+                    end
+                end)
+                break
+            end
+        end
+    end
+end)
+
+-- 🔥 Auto Cash Farm (Fire無限 + Build)
+local farmLoop = false
+spawn(function()
+    while farmLoop do
+        buildCannon()  -- 毎回再構築
+        pcall(function() fireRemote:FireServer() end)
+        stateRemote:InvokeServer(player)
+        print("💥 AutoFire → $Cash増加待機...")
+        task.wait(0.8)  -- クールダウン（調整）
+    end
+end)
+
+-- 🛒 オプション: 無料/安パーツAutoBuy (初回cash貯め)
+local freeItems = {"Wood Block", "Basic Part", "Present Block", "Part"}
 local autoBuy = false
 spawn(function()
     while autoBuy do
-        for _, item in ipairs(items) do
-            for _, pat in ipairs(argPatterns) do
-                pcall(function()
-                    purchaseRemote:FireServer(unpack(pat(item)))
-                    print("🛒 買い: " .. item .. " (パターン)")
-                end)
-            end
-            stateRemote:InvokeServer(player)  -- 即同期
+        for _, item in ipairs(freeItems) do
+            pcall(function()
+                purchaseRemote:FireServer(item, "Part")
+            end)
         end
-        task.wait(0.03)  -- 超高速
+        task.wait(0.2)
     end
 end)
 
--- 🏗️ AutoBuild大砲 (自動最強構築: Base + Barrel + TNT積み)
-local cannonBuilt = false
-local function buildCannon()
-    if cannonBuilt then return end
-    cannonBuilt = true
-    local root = WS:FindFirstChild("CannonBase") or Instance.new("Part")
-    root.Name = "CannonBase"
-    root.Size = Vector3.new(10,2,10)
-    root.Position = player.Character.HumanoidRootPart.Position + Vector3.new(0,5,10)
-    root.Anchored = true
-    root.BrickColor = BrickColor.new("Dark stone grey")
-    root.Parent = WS
-
-    -- Barrel追加
-    local barrel = Instance.new("Part")
-    barrel.Name = "Barrel"
-    barrel.Size = Vector3.new(2,2,20)
-    barrel.Position = root.Position + Vector3.new(0,0,15)
-    barrel.Anchored = true
-    barrel.BrickColor = BrickColor.new("Really black")
-    barrel.Parent = WS
-
-    -- TNT積み (爆発力max)
-    for i=1,10 do
-        local tnt = Instance.new("Part")
-        tnt.Name = "TNT"
-        tnt.Size = Vector3.new(4,4,4)
-        tnt.Position = barrel.Position + Vector3.new(0,0,5 + i*5)
-        tnt.BrickColor = BrickColor.new("Bright red")
-        tnt.Parent = WS
-    end
-    print("🏗️ 最強大砲自動構築完了！")
-end
-
--- 💥 AutoFire (構築後連射)
-local autoFire = false
-spawn(function()
-    while autoFire do
-        buildCannon()  -- 毎回構築確認
-        pcall(function() fireRemote:FireServer() end)
-        stateRemote:InvokeServer(player)
-        print("💥 自動発射！")
-        task.wait(0.5)  -- クール調整
-    end
-end)
-
--- 🎮 GUI (超簡単)
+-- 🎮 GUI (ドラッグOK・Cash特化)
 local sg = Instance.new("ScreenGui", player.PlayerGui)
+sg.Name = "CashGodHub"
 local frame = Instance.new("Frame", sg)
-frame.Size = UDim2.new(0.4,0,0.7,0)
-frame.Position = UDim2.new(0,10,0.2,0)
-frame.BackgroundColor3 = Color3.new(0,0,0)
-frame.BackgroundTransparency = 0.2
+frame.Size = UDim2.new(0.4,0,0.6,0)
+frame.Position = UDim2.new(0.02,0,0.2,0)
+frame.BackgroundColor3 = Color3.fromRGB(0,20,50)
+frame.BackgroundTransparency = 0.1
 frame.Active = true
 frame.Draggable = true
 
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0.1,0)
-title.Text = "🔥 v4.0 修正Hub"
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundTransparency = 1
+title.Size = UDim2.new(1,0,0.12,0)
+title.Text = "💵 $Cash無限 v6.0"
+title.TextColor3 = Color3.new(1,1,0)
 title.TextScaled = true
+title.BackgroundTransparency = 1
+title.Parent = frame
 
-local buyBtn = Instance.new("TextButton", frame)
-buyBtn.Size = UDim2.new(1,0,0.15,0)
-buyBtn.Position = UDim2.new(0,0,0.12,0)
-buyBtn.Text = "🛒 AutoBuy OFF"
-buyBtn.BackgroundColor3 = Color3.new(1,0,0)
-buyBtn.TextScaled = true
-buyBtn.MouseButton1Click:Connect(function()
-    autoBuy = not autoBuy
-    buyBtn.Text = autoBuy and "🛒 AutoBuy ON" or "🛒 AutoBuy OFF"
-    buyBtn.BackgroundColor3 = autoBuy and Color3.new(0,1,0) or Color3.new(1,0,0)
+local farmBtn = Instance.new("TextButton", frame)
+farmBtn.Size = UDim2.new(1,0,0.18,0)
+farmBtn.Position = UDim2.new(0,0,0.15,0)
+farmBtn.Text = "💥 $Cash Farm OFF"
+farmBtn.BackgroundColor3 = Color3.new(1,0,0)
+farmBtn.TextScaled = true
+farmBtn.Parent = frame
+farmBtn.MouseButton1Click:Connect(function()
+    farmLoop = not farmLoop
+    farmBtn.Text = farmLoop and "💥 $Cash Farm ON" or "💥 $Cash Farm OFF"
+    farmBtn.BackgroundColor3 = farmLoop and Color3.new(0,1,0) or Color3.new(1,0,0)
 end)
 
-local fireBtn = Instance.new("TextButton", frame)
-fireBtn.Size = UDim2.new(1,0,0.15,0)
-fireBtn.Position = UDim2.new(0,0,0.32,0)
-fireBtn.Text = "💥 AutoFire OFF"
-fireBtn.BackgroundColor3 = Color3.new(1,0,0)
-fireBtn.TextScaled = true
-fireBtn.MouseButton1Click:Connect(function()
-    autoFire = not autoFire
-    fireBtn.Text = autoFire and "💥 AutoFire ON" or "💥 AutoFire OFF"
-    fireBtn.BackgroundColor3 = autoFire and Color3.new(0,1,0) or Color3.new(1,0,0)
+local buyBtn = Instance.new("TextButton", frame)
+buyBtn.Size = UDim2.new(1,0,0.18,0)
+buyBtn.Position = UDim2.new(0,0,0.38,0)
+buyBtn.Text = "🛒 無料パーツBuy OFF"
+buyBtn.BackgroundColor3 = Color3.new(0.5,0.5,1)
+buyBtn.TextScaled = true
+buyBtn.Parent = frame
+buyBtn.MouseButton1Click:Connect(function()
+    autoBuy = not autoBuy
+    buyBtn.Text = autoBuy and "🛒 無料パーツBuy ON" or "🛒 無料パーツBuy OFF"
+    buyBtn.BackgroundColor3 = autoBuy and Color3.new(0,0.8,1) or Color3.new(0.5,0.5,1)
 end)
 
 local buildBtn = Instance.new("TextButton", frame)
-buildBtn.Size = UDim2.new(1,0,0.15,0)
-buildBtn.Position = UDim2.new(0,0,0.52,0)
-buildBtn.Text = "🏗️ Build Now"
-buildBtn.BackgroundColor3 = Color3.new(0,0.7,1)
+buildBtn.Size = UDim2.new(1,0,0.18,0)
+buildBtn.Position = UDim2.new(0,0,0.61,0)
+buildBtn.Text = "🏗️ 大砲構築"
+buildBtn.BackgroundColor3 = Color3.new(0,0.8,0)
 buildBtn.TextScaled = true
+buildBtn.Parent = frame
 buildBtn.MouseButton1Click:Connect(buildCannon)
 
 local info = Instance.new("TextLabel", frame)
-info.Size = UDim2.new(1,0,0.35,0)
-info.Position = UDim2.new(0,0,0.72,0)
-info.Text = "1. AutoBuy ON\n2. 10秒待つ\n3. AutoFire ON\n→1位！\n;flyで調整"
+info.Size = UDim2.new(1,0,0.25,0)
+info.Position = UDim2.new(0,0,0.82,0)
+info.Text = "1. 🏗️構築\n2. 💥 Farm ON\n3. Consoleで$Cash増加確認\n→放置で兆！\n;flyで狙い"
 info.TextColor3 = Color3.new(1,1,1)
 info.BackgroundTransparency = 1
 info.TextScaled = true
+info.TextWrapped = true
+info.Parent = frame
 
-print("🎉 v4.0ロード！ Buy/Fire修正 → GUIタップ → 放置1位！")
+print("🎉 v6.0ロード！ Consoleで「$Cash増加」待機 → 1位+金持ち！")
