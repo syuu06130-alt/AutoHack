@@ -1,1175 +1,1173 @@
--- TurtleSpy V1.5.3日本語版 / TurtleSpy V1.5.3 Japanese Version
--- 作成者: Intrer#0421 / Credits to Intrer#0421
+-- TurtleSpy V1.5.3, credits to Intrer#0421
+-- 日本語版 (Japanese Version)
 
-local 色設定 = {
-    ["メイン"] = {
-        ["ヘッダー色"] = Color3.fromRGB(0, 168, 255),
-        ["ヘッダー陰影色"] = Color3.fromRGB(0, 151, 230),
-        ["ヘッダーテキスト色"] = Color3.fromRGB(47, 54, 64),
-        ["メイン背景色"] = Color3.fromRGB(47, 54, 64),
-        ["情報スクロールフレーム背景色"] = Color3.fromRGB(47, 54, 64),
-        ["スクロールバー画像色"] = Color3.fromRGB(127, 143, 166)
+local colorSettings =
+{
+    ["Main"] = {
+        ["HeaderColor"] = Color3.fromRGB(0, 168, 255),
+        ["HeaderShadingColor"] = Color3.fromRGB(0, 151, 230),
+        ["HeaderTextColor"] = Color3.fromRGB(47, 54, 64),
+        ["MainBackgroundColor"] = Color3.fromRGB(47, 54, 64),
+        ["InfoScrollingFrameBgColor"] = Color3.fromRGB(47, 54, 64),
+        ["ScrollBarImageColor"] = Color3.fromRGB(127, 143, 166)
     },
-    ["リモートボタン"] = {
-        ["境界線色"] = Color3.fromRGB(113, 128, 147),
-        ["背景色"] = Color3.fromRGB(53, 59, 72),
-        ["テキスト色"] = Color3.fromRGB(220, 221, 225),
-        ["数字テキスト色"] = Color3.fromRGB(203, 204, 207)
+    ["RemoteButtons"] = {
+        ["BorderColor"] = Color3.fromRGB(113, 128, 147),
+        ["BackgroundColor"] = Color3.fromRGB(53, 59, 72),
+        ["TextColor"] = Color3.fromRGB(220, 221, 225),
+        ["NumberTextColor"] = Color3.fromRGB(203, 204, 207)
     },
-    ["メインボタン"] = { 
-        ["境界線色"] = Color3.fromRGB(113, 128, 147),
-        ["背景色"] = Color3.fromRGB(53, 59, 72),
-        ["テキスト色"] = Color3.fromRGB(220, 221, 225)
+    ["MainButtons"] = { 
+        ["BorderColor"] = Color3.fromRGB(113, 128, 147),
+        ["BackgroundColor"] = Color3.fromRGB(53, 59, 72),
+        ["TextColor"] = Color3.fromRGB(220, 221, 225)
     },
-    ['コード'] = {
-        ['背景色'] = Color3.fromRGB(35, 40, 48),
-        ['テキスト色'] = Color3.fromRGB(220, 221, 225),
-        ['クレジット色'] = Color3.fromRGB(108, 108, 108)
+    ['Code'] = {
+        ['BackgroundColor'] = Color3.fromRGB(35, 40, 48),
+        ['TextColor'] = Color3.fromRGB(220, 221, 225),
+        ['CreditsColor'] = Color3.fromRGB(108, 108, 108)
     },
 }
 
-local 設定 = {
-    ["キーバインド"] = "P" -- Keybind
+local settings = {
+["Keybind"] = "P"
 }
 
 if PROTOSMASHER_LOADED then
-    getgenv().isfile = newcclosure(function(ファイル) -- File
-        local 成功, エラー = pcall(readfile, ファイル)
-        if not 成功 then
+    getgenv().isfile = newcclosure(function(File)
+        local Suc, Er = pcall(readfile, File)
+        if not Suc then
             return false
         end
         return true
     end)
 end
 
-local HTTPサービス = game:GetService("HttpService") -- HttpService
--- キーバインドの設定を読み込む / Read settings for keybind
-if not isfile("TurtleSpy設定.json") then -- TurtleSpySettings.json
-    writefile("TurtleSpy設定.json", HTTPサービス:JSONEncode(設定)) -- TurtleSpySettings.json
+local HttpService = game:GetService("HttpService")
+-- read settings for keybind
+if not isfile("TurtleSpySettings.json") then
+    writefile("TurtleSpySettings.json", HttpService:JSONEncode(settings))
 else
-    if HTTPサービス:JSONDecode(readfile("TurtleSpy設定.json"))["メイン"] then -- Main
-        writefile("TurtleSpy設定.json", HTTPサービス:JSONEncode(設定)) -- TurtleSpySettings.json
+    if HttpService:JSONDecode(readfile("TurtleSpySettings.json"))["Main"] then
+        writefile("TurtleSpySettings.json", HttpService:JSONEncode(settings))
     else
-        設定 = HTTPサービス:JSONDecode(readfile("TurtleSpy設定.json"))
+        settings = HttpService:JSONDecode(readfile("TurtleSpySettings.json"))
     end
 end
 
--- プロトスマッシャー互換性 / Compatibility for protosmasher
--- クレジット: sdjsdj (v3rmユーザー名) / credits to sdjsdj (v3rm username) for converting to proto
+-- Compatibility for protosmasher: credits to sdjsdj (v3rm username) for converting to proto
 
 function isSynapse()
     if PROTOSMASHER_LOADED then
         return false
     else
-        return true
+    return true
     end
 end
-
-function 親に設定(ギューアイ) -- Parent(GUI)
+function Parent(GUI)
     if syn and syn.protect_gui then
-        syn.protect_gui(ギューアイ)
-        ギューアイ.Parent = game:GetService("CoreGui")
+        syn.protect_gui(GUI)
+        GUI.Parent = game:GetService("CoreGui")
     elseif PROTOSMASHER_LOADED then
-        ギューアイ.Parent = get_hidden_gui()
+        GUI.Parent = get_hidden_gui()
     else
-        ギューアイ.Parent = game:GetService("CoreGui")
+        GUI.Parent = game:GetService("CoreGui")
     end
 end
 
-local クライアント = game.Players.LocalPlayer -- client
-local function ユニコードに変換(文字列) -- toUnicode(string)
-    local コードポイント = "utf8.char(" -- codepoints
+local client = game.Players.LocalPlayer
+local function toUnicode(string)
+    local codepoints = "utf8.char("
     
-    for _索引, 値 in utf8.codes(文字列) do -- _i, v
-        コードポイント = コードポイント .. 値 .. ', '
+    for _i, v in utf8.codes(string) do
+        codepoints = codepoints .. v .. ', '
     end
     
-    return コードポイント:sub(1, -3) .. ')'
+    return codepoints:sub(1, -3) .. ')'
 end
-
-local function インスタンスの完全パスを取得(インスタンス) -- GetFullPathOfAnInstance(instance)
-    local 名前 = インスタンス.Name -- name
-    local ヘッド = (#名前 > 0 and '.' .. 名前) or "['']" -- head
+local function GetFullPathOfAnInstance(instance)
+    local name = instance.Name
+    local head = (#name > 0 and '.' .. name) or "['']"
     
-    if not インスタンス.Parent and インスタンス ~= game then
-        return ヘッド .. " --[[ 親がnilまたは破棄されました ]] --[[ PARENTED TO NIL OR DESTROYED ]]"
+    if not instance.Parent and instance ~= game then
+        return head .. " --[[ PARENTED TO NIL OR DESTROYED ]]"
     end
     
-    if インスタンス == game then
+    if instance == game then
         return "game"
-    elseif インスタンス == workspace then
+    elseif instance == workspace then
         return "workspace"
     else
-        local _成功, 結果 = pcall(game.GetService, game, インスタンス.ClassName) -- _success, result
+        local _success, result = pcall(game.GetService, game, instance.ClassName)
         
-        if 結果 then -- result
-            ヘッド = ':GetService("' .. インスタンス.ClassName .. '")'
-        elseif インスタンス == クライアント then -- client
-            ヘッド = '.LocalPlayer' 
+        if result then
+            head = ':GetService("' .. instance.ClassName .. '")'
+        elseif instance == client then
+            head = '.LocalPlayer' 
         else
-            local 英数字以外 = 名前:gsub('[%w_]', '') -- nonAlphaNum
-            local 句読点なし = 英数字以外:gsub('[%s%p]', '') -- noPunct
+            local nonAlphaNum = name:gsub('[%w_]', '')
+            local noPunct = nonAlphaNum:gsub('[%s%p]', '')
             
-            if tonumber(名前:sub(1, 1)) or (#英数字以外 ~= 0 and #句読点なし == 0) then
-                ヘッド = '["' .. 名前:gsub('"', '\\"'):gsub('\\', '\\\\') .. '"]'
-            elseif #英数字以外 ~= 0 and #句読点なし > 0 then
-                ヘッド = '[' .. ユニコードに変換(名前) .. ']'
+            if tonumber(name:sub(1, 1)) or (#nonAlphaNum ~= 0 and #noPunct == 0) then
+                head = '["' .. name:gsub('"', '\\"'):gsub('\\', '\\\\') .. '"]'
+            elseif #nonAlphaNum ~= 0 and #noPunct > 0 then
+                head = '[' .. toUnicode(name) .. ']'
             end
         end
     end
     
-    return インスタンスの完全パスを取得(インスタンス.Parent) .. ヘッド
+    return GetFullPathOfAnInstance(instance.Parent) .. head
 end
+-- Main Script
 
--- メインスクリプト / Main Script
+-- references to game functions (to prevent using namecall inside of a namecall hook)
+local isA = game.IsA
+local clone = game.Clone
 
--- ゲーム関数への参照 / references to game functions (to prevent using namecall inside of a namecall hook)
-local タイプ確認 = game.IsA -- isA
-local 複製 = game.Clone -- clone
-
-local テキストサービス = game:GetService("TextService") -- TextService
-local テキストサイズ取得 = テキストサービス.GetTextSize -- getTextSize
+local TextService = game:GetService("TextService")
+local getTextSize = TextService.GetTextSize
 game.StarterGui.ResetPlayerGuiOnSpawn = false
-local マウス = game.Players.LocalPlayer:GetMouse() -- mouse
+local mouse = game.Players.LocalPlayer:GetMouse()
 
--- 以前のTurtleSpyインスタンスを削除 / delete the previous instances of turtlespy
+-- delete the previous instances of turtlespy
 if game.CoreGui:FindFirstChild("TurtleSpyGUI") then
     game.CoreGui.TurtleSpyGUI:Destroy()
 end
 
--- 重要なテーブルとGUIオフセット / Important tables and GUI offsets
-local ボタンオフセット = -25 -- buttonOffset
-local スクロールサイズオフセット = 287 -- scrollSizeOffset
-local 関数画像 = "http://www.roblox.com/asset/?id=413369623" -- functionImage
-local イベント画像 = "http://www.roblox.com/asset/?id=413369506" -- eventImage
-local リモート一覧 = {} -- remotes
-local リモート引数 = {} -- remoteArgs
-local リモートボタン一覧 = {} -- remoteButtons
-local リモートスクリプト一覧 = {} -- remoteScripts
-local 無視リスト = {} -- IgnoreList
-local ブロックリスト = {} -- BlockList
-local 接続一覧 = {} -- connections
-local 非積み上げリスト = {} -- unstacked
+--Important tables and GUI offsets
+local buttonOffset = -25
+local scrollSizeOffset = 287
+local functionImage = "http://www.roblox.com/asset/?id=413369623"
+local eventImage = "http://www.roblox.com/asset/?id=413369506"
+local remotes = {}
+local remoteArgs = {}
+local remoteButtons = {}
+local remoteScripts = {}
+local IgnoreList = {}
+local BlockList = {}
+local IgnoreList = {}
+local connections = {}
+local unstacked = {}
 
--- (主に) Gui to luaによって生成されたコード / (mostly) generated code by Gui to lua
+-- (mostly) generated code by Gui to lua
 local TurtleSpyGUI = Instance.new("ScreenGui")
-local メインフレーム = Instance.new("Frame") -- mainFrame
-local ヘッダー = Instance.new("Frame") -- Header
-local ヘッダー陰影 = Instance.new("Frame") -- HeaderShading
-local ヘッダーテキストラベル = Instance.new("TextLabel") -- HeaderTextLabel
-local リモートスクロールフレーム = Instance.new("ScrollingFrame") -- RemoteScrollFrame
-local リモートボタン = Instance.new("TextButton") -- RemoteButton
-local 数字 = Instance.new("TextLabel") -- Number
-local リモート名 = Instance.new("TextLabel") -- RemoteName
-local リモートアイコン = Instance.new("ImageLabel") -- RemoteIcon
-local 情報フレーム = Instance.new("Frame") -- InfoFrame
-local 情報フレームヘッダー = Instance.new("Frame") -- InfoFrameHeader
-local 情報タイトル陰影 = Instance.new("Frame") -- InfoTitleShading
-local コードフレーム = Instance.new("ScrollingFrame") -- CodeFrame
-local コード = Instance.new("TextLabel") -- Code
-local コードコメント = Instance.new("TextLabel") -- CodeComment
-local 情報ヘッダーテキスト = Instance.new("TextLabel") -- InfoHeaderText
-local 情報ボタンスクロール = Instance.new("ScrollingFrame") -- InfoButtonsScroll
-local コードコピー = Instance.new("TextButton") -- CopyCode
-local コード実行 = Instance.new("TextButton") -- RunCode
-local スクリプトパスコピー = Instance.new("TextButton") -- CopyScriptPath
-local 逆コンパイルコピー = Instance.new("TextButton") -- CopyDecompiled
-local リモート無視 = Instance.new("TextButton") -- IgnoreRemote
-local リモートブロック = Instance.new("TextButton") -- BlockRemote
-local 無限ループ生成 = Instance.new("TextButton") -- WhileLoop
-local 戻り値コピー = Instance.new("TextButton") -- CopyReturn
-local クリア = Instance.new("TextButton") -- Clear
-local フレーム仕切り = Instance.new("Frame") -- FrameDivider
-local 情報フレーム閉じる = Instance.new("TextButton") -- CloseInfoFrame
-local 情報フレーム開く = Instance.new("TextButton") -- OpenInfoFrame
-local 最小化 = Instance.new("TextButton") -- Minimize
-local 積み上げ無効 = Instance.new("TextButton") -- DoNotStack
-local 画像ボタン = Instance.new("ImageButton") -- ImageButton
+local mainFrame = Instance.new("Frame")
+local Header = Instance.new("Frame")
+local HeaderShading = Instance.new("Frame")
+local HeaderTextLabel = Instance.new("TextLabel")
+local RemoteScrollFrame = Instance.new("ScrollingFrame")
+local RemoteButton = Instance.new("TextButton")
+local Number = Instance.new("TextLabel")
+local RemoteName = Instance.new("TextLabel")
+local RemoteIcon = Instance.new("ImageLabel")
+local InfoFrame = Instance.new("Frame")
+local InfoFrameHeader = Instance.new("Frame")
+local InfoTitleShading = Instance.new("Frame")
+local CodeFrame = Instance.new("ScrollingFrame")
+local Code = Instance.new("TextLabel")
+local CodeComment = Instance.new("TextLabel")
+local InfoHeaderText = Instance.new("TextLabel")
+local InfoButtonsScroll = Instance.new("ScrollingFrame")
+local CopyCode = Instance.new("TextButton")
+local RunCode = Instance.new("TextButton")
+local CopyScriptPath = Instance.new("TextButton")
+local CopyDecompiled = Instance.new("TextButton")
+local IgnoreRemote = Instance.new("TextButton")
+local BlockRemote = Instance.new("TextButton")
+local WhileLoop = Instance.new("TextButton")
+local CopyReturn = Instance.new("TextButton")
+local Clear = Instance.new("TextButton")
+local FrameDivider = Instance.new("Frame")
+local CloseInfoFrame = Instance.new("TextButton")
+local OpenInfoFrame = Instance.new("TextButton")
+local Minimize = Instance.new("TextButton")
+local DoNotStack = Instance.new("TextButton")
+local ImageButton = Instance.new("ImageButton")
 
--- リモートブラウザ / Remote browser
-local ブラウザヘッダー = Instance.new("Frame") -- BrowserHeader
-local ブラウザヘッダーフレーム = Instance.new("Frame") -- BrowserHeaderFrame
-local ブラウザヘッダーテキスト = Instance.new("TextLabel") -- BrowserHeaderText
-local ブラウザ閉じる = Instance.new("TextButton") -- CloseInfoFrame2
-local リモートブラウザフレーム = Instance.new("ScrollingFrame") -- RemoteBrowserFrame
-local ブラウザリモートボタン = Instance.new("TextButton") -- RemoteButton2
-local ブラウザリモート名 = Instance.new("TextLabel") -- RemoteName2
-local ブラウザリモートアイコン = Instance.new("ImageLabel") -- RemoteIcon2
+-- Remote browser
+local BrowserHeader = Instance.new("Frame")
+local BrowserHeaderFrame = Instance.new("Frame")
+local BrowserHeaderText = Instance.new("TextLabel")
+local CloseInfoFrame2 = Instance.new("TextButton")
+local RemoteBrowserFrame = Instance.new("ScrollingFrame")
+local RemoteButton2 = Instance.new("TextButton")
+local RemoteName2 = Instance.new("TextLabel")
+local RemoteIcon2 = Instance.new("ImageLabel")
 
 TurtleSpyGUI.Name = "TurtleSpyGUI"
-TurtleSpyGUI.Name = "TurtleSpyGUI"
-親に設定(TurtleSpyGUI) -- Parent(TurtleSpyGUI)
 
-メインフレーム.Name = "メインフレーム" -- mainFrame
-メインフレーム.Parent = TurtleSpyGUI
-メインフレーム.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-メインフレーム.BorderColor3 = Color3.fromRGB(53, 59, 72)
-メインフレーム.Position = UDim2.new(0.100000001, 0, 0.239999995, 0)
-メインフレーム.Size = UDim2.new(0, 207, 0, 35)
-メインフレーム.ZIndex = 8
-メインフレーム.Active = true
-メインフレーム.Draggable = true
+Parent(TurtleSpyGUI)
 
--- リモートブラウザプロパティ / Remote browser properties
+mainFrame.Name = "mainFrame"
+mainFrame.Parent = TurtleSpyGUI
+mainFrame.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
+mainFrame.BorderColor3 = Color3.fromRGB(53, 59, 72)
+mainFrame.Position = UDim2.new(0.100000001, 0, 0.239999995, 0)
+mainFrame.Size = UDim2.new(0, 207, 0, 35)
+mainFrame.ZIndex = 8
+mainFrame.Active = true
+mainFrame.Draggable = true
 
-ブラウザヘッダー.Name = "ブラウザヘッダー" -- BrowserHeader
-ブラウザヘッダー.Parent = TurtleSpyGUI
-ブラウザヘッダー.BackgroundColor3 = 色設定["メイン"]["ヘッダー陰影色"] -- colorSettings["Main"]["HeaderShadingColor"]
-ブラウザヘッダー.BorderColor3 = 色設定["メイン"]["ヘッダー陰影色"] -- colorSettings["Main"]["HeaderShadingColor"]
-ブラウザヘッダー.Position = UDim2.new(0.712152421, 0, 0.339464903, 0)
-ブラウザヘッダー.Size = UDim2.new(0, 207, 0, 33)
-ブラウザヘッダー.ZIndex = 20
-ブラウザヘッダー.Active = true
-ブラウザヘッダー.Draggable = true
-ブラウザヘッダー.Visible = false
+-- Remote browser properties
 
-ブラウザヘッダーフレーム.Name = "ブラウザヘッダーフレーム" -- BrowserHeaderFrame
-ブラウザヘッダーフレーム.Parent = ブラウザヘッダー
-ブラウザヘッダーフレーム.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-ブラウザヘッダーフレーム.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-ブラウザヘッダーフレーム.Position = UDim2.new(0, 0, -0.0202544238, 0)
-ブラウザヘッダーフレーム.Size = UDim2.new(0, 207, 0, 26)
-ブラウザヘッダーフレーム.ZIndex = 21
+BrowserHeader.Name = "BrowserHeader"
+BrowserHeader.Parent = TurtleSpyGUI
+BrowserHeader.BackgroundColor3 = colorSettings["Main"]["HeaderShadingColor"]
+BrowserHeader.BorderColor3 = colorSettings["Main"]["HeaderShadingColor"]
+BrowserHeader.Position = UDim2.new(0.712152421, 0, 0.339464903, 0)
+BrowserHeader.Size = UDim2.new(0, 207, 0, 33)
+BrowserHeader.ZIndex = 20
+BrowserHeader.Active = true
+BrowserHeader.Draggable = true
+BrowserHeader.Visible = false
 
-ブラウザヘッダーテキスト.Name = "情報ヘッダーテキスト" -- InfoHeaderText
-ブラウザヘッダーテキスト.Parent = ブラウザヘッダーフレーム
-ブラウザヘッダーテキスト.BackgroundTransparency = 1.000
-ブラウザヘッダーテキスト.Position = UDim2.new(0, 0, -0.00206991332, 0)
-ブラウザヘッダーテキスト.Size = UDim2.new(0, 206, 0, 33)
-ブラウザヘッダーテキスト.ZIndex = 22
-ブラウザヘッダーテキスト.Font = Enum.Font.SourceSans
-ブラウザヘッダーテキスト.Text = "リモートブラウザ / Remote Browser"
-ブラウザヘッダーテキスト.TextColor3 = 色設定["メイン"]["ヘッダーテキスト色"] -- colorSettings["Main"]["HeaderTextColor"]
-ブラウザヘッダーテキスト.TextSize = 17.000
+BrowserHeaderFrame.Name = "BrowserHeaderFrame"
+BrowserHeaderFrame.Parent = BrowserHeader
+BrowserHeaderFrame.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+BrowserHeaderFrame.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+BrowserHeaderFrame.Position = UDim2.new(0, 0, -0.0202544238, 0)
+BrowserHeaderFrame.Size = UDim2.new(0, 207, 0, 26)
+BrowserHeaderFrame.ZIndex = 21
 
-ブラウザ閉じる.Name = "ブラウザ閉じる" -- CloseInfoFrame
-ブラウザ閉じる.Parent = ブラウザヘッダーフレーム
-ブラウザ閉じる.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-ブラウザ閉じる.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-ブラウザ閉じる.Position = UDim2.new(0, 185, 0, 2)
-ブラウザ閉じる.Size = UDim2.new(0, 22, 0, 22)
-ブラウザ閉じる.ZIndex = 38
-ブラウザ閉じる.Font = Enum.Font.SourceSansLight
-ブラウザ閉じる.Text = "X"
-ブラウザ閉じる.TextColor3 = Color3.fromRGB(0, 0, 0)
-ブラウザ閉じる.TextSize = 20.000
-ブラウザ閉じる.MouseButton1Click:Connect(function()
-    ブラウザヘッダー.Visible = not ブラウザヘッダー.Visible
+BrowserHeaderText.Name = "InfoHeaderText"
+BrowserHeaderText.Parent = BrowserHeaderFrame
+BrowserHeaderText.BackgroundTransparency = 1.000
+BrowserHeaderText.Position = UDim2.new(0, 0, -0.00206991332, 0)
+BrowserHeaderText.Size = UDim2.new(0, 206, 0, 33)
+BrowserHeaderText.ZIndex = 22
+BrowserHeaderText.Font = Enum.Font.SourceSans
+BrowserHeaderText.Text = "リモートブラウザ\nRemote Browser"
+BrowserHeaderText.TextColor3 = colorSettings["Main"]["HeaderTextColor"]
+BrowserHeaderText.TextSize = 14.000
+
+CloseInfoFrame2.Name = "CloseInfoFrame"
+CloseInfoFrame2.Parent = BrowserHeaderFrame
+CloseInfoFrame2.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+CloseInfoFrame2.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+CloseInfoFrame2.Position = UDim2.new(0, 185, 0, 2)
+CloseInfoFrame2.Size = UDim2.new(0, 22, 0, 22)
+CloseInfoFrame2.ZIndex = 38
+CloseInfoFrame2.Font = Enum.Font.SourceSansLight
+CloseInfoFrame2.Text = "X"
+CloseInfoFrame2.TextColor3 = Color3.fromRGB(0, 0, 0)
+CloseInfoFrame2.TextSize = 20.000
+CloseInfoFrame2.MouseButton1Click:Connect(function()
+    BrowserHeader.Visible = not BrowserHeader.Visible
 end)
 
-リモートブラウザフレーム.Name = "リモートブラウザフレーム" -- RemoteBrowserFrame
-リモートブラウザフレーム.Parent = ブラウザヘッダー
-リモートブラウザフレーム.Active = true
-リモートブラウザフレーム.BackgroundColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-リモートブラウザフレーム.BorderColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-リモートブラウザフレーム.Position = UDim2.new(-0.004540205, 0, 1.03504682, 0)
-リモートブラウザフレーム.Size = UDim2.new(0, 207, 0, 286)
-リモートブラウザフレーム.ZIndex = 19
-リモートブラウザフレーム.CanvasSize = UDim2.new(0, 0, 0, 287)
-リモートブラウザフレーム.ScrollBarThickness = 8
-リモートブラウザフレーム.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
-リモートブラウザフレーム.ScrollBarImageColor3 = 色設定["メイン"]["スクロールバー画像色"] -- colorSettings["Main"]["ScrollBarImageColor"]
+RemoteBrowserFrame.Name = "RemoteBrowserFrame"
+RemoteBrowserFrame.Parent = BrowserHeader
+RemoteBrowserFrame.Active = true
+RemoteBrowserFrame.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
+RemoteBrowserFrame.BorderColor3 = Color3.fromRGB(47, 54, 64)
+RemoteBrowserFrame.Position = UDim2.new(-0.004540205, 0, 1.03504682, 0)
+RemoteBrowserFrame.Size = UDim2.new(0, 207, 0, 286)
+RemoteBrowserFrame.ZIndex = 19
+RemoteBrowserFrame.CanvasSize = UDim2.new(0, 0, 0, 287)
+RemoteBrowserFrame.ScrollBarThickness = 8
+RemoteBrowserFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
+RemoteBrowserFrame.ScrollBarImageColor3 = colorSettings["Main"]["ScrollBarImageColor"]
 
-ブラウザリモートボタン.Name = "ブラウザリモートボタン" -- RemoteButton
-ブラウザリモートボタン.Parent = リモートブラウザフレーム
-ブラウザリモートボタン.BackgroundColor3 = 色設定["リモートボタン"]["背景色"] -- colorSettings["RemoteButtons"]["BackgroundColor"]
-ブラウザリモートボタン.BorderColor3 = 色設定["リモートボタン"]["境界線色"] -- colorSettings["RemoteButtons"]["BorderColor"]
-ブラウザリモートボタン.Position = UDim2.new(0, 17, 0, 10)
-ブラウザリモートボタン.Size = UDim2.new(0, 182, 0, 26)
-ブラウザリモートボタン.ZIndex = 20
-ブラウザリモートボタン.Selected = true
-ブラウザリモートボタン.Font = Enum.Font.SourceSans
-ブラウザリモートボタン.Text = ""
-ブラウザリモートボタン.TextSize = 18.000
-ブラウザリモートボタン.TextStrokeTransparency = 123.000
-ブラウザリモートボタン.TextWrapped = true
-ブラウザリモートボタン.TextXAlignment = Enum.TextXAlignment.Left
-ブラウザリモートボタン.Visible = false
+RemoteButton2.Name = "RemoteButton"
+RemoteButton2.Parent = RemoteBrowserFrame
+RemoteButton2.BackgroundColor3 = colorSettings["RemoteButtons"]["BackgroundColor"]
+RemoteButton2.BorderColor3 = colorSettings["RemoteButtons"]["BorderColor"]
+RemoteButton2.Position = UDim2.new(0, 17, 0, 10)
+RemoteButton2.Size = UDim2.new(0, 182, 0, 26)
+RemoteButton2.ZIndex = 20
+RemoteButton2.Selected = true
+RemoteButton2.Font = Enum.Font.SourceSans
+RemoteButton2.Text = ""
+RemoteButton2.TextSize = 18.000
+RemoteButton2.TextStrokeTransparency = 123.000
+RemoteButton2.TextWrapped = true
+RemoteButton2.TextXAlignment = Enum.TextXAlignment.Left
+RemoteButton2.Visible = false
 
-ブラウザリモート名.Name = "ブラウザリモート名" -- RemoteName2
-ブラウザリモート名.Parent = ブラウザリモートボタン
-ブラウザリモート名.BackgroundTransparency = 1.000
-ブラウザリモート名.Position = UDim2.new(0, 5, 0, 0)
-ブラウザリモート名.Size = UDim2.new(0, 155, 0, 26)
-ブラウザリモート名.ZIndex = 21
-ブラウザリモート名.Font = Enum.Font.SourceSans
-ブラウザリモート名.Text = "RemoteEventaasdadad"
-ブラウザリモート名.TextColor3 = 色設定["リモートボタン"]["テキスト色"] -- colorSettings["RemoteButtons"]["TextColor"]
-ブラウザリモート名.TextSize = 16.000
-ブラウザリモート名.TextXAlignment = Enum.TextXAlignment.Left
-ブラウザリモート名.TextTruncate = 1
+RemoteName2.Name = "RemoteName2"
+RemoteName2.Parent = RemoteButton2
+RemoteName2.BackgroundTransparency = 1.000
+RemoteName2.Position = UDim2.new(0, 5, 0, 0)
+RemoteName2.Size = UDim2.new(0, 155, 0, 26)
+RemoteName2.ZIndex = 21
+RemoteName2.Font = Enum.Font.SourceSans
+RemoteName2.Text = "RemoteEventaasdadad"
+RemoteName2.TextColor3 = colorSettings["RemoteButtons"]["TextColor"]
+RemoteName2.TextSize = 16.000
+RemoteName2.TextXAlignment = Enum.TextXAlignment.Left
+RemoteName2.TextTruncate = 1
 
-ブラウザリモートアイコン.Name = "ブラウザリモートアイコン" -- RemoteIcon2
-ブラウザリモートアイコン.Parent = ブラウザリモートボタン
-ブラウザリモートアイコン.BackgroundTransparency = 1.000
-ブラウザリモートアイコン.Position = UDim2.new(0.840260386, 0, 0.0225472748, 0)
-ブラウザリモートアイコン.Size = UDim2.new(0, 24, 0, 24)
-ブラウザリモートアイコン.ZIndex = 21
-ブラウザリモートアイコン.Image = 関数画像 -- functionImage
 
-local 閲覧済みリモート = {} -- browsedRemotes
-local 閲覧済み接続 = {} -- browsedConnections
-local ブラウザボタンオフセット = 10 -- browsedButtonOffset
-local ブラウザキャンバスサイズ = 286 -- browserCanvasSize
+RemoteIcon2.Name = "RemoteIcon2"
+RemoteIcon2.Parent = RemoteButton2
+RemoteIcon2.BackgroundTransparency = 1.000
+RemoteIcon2.Position = UDim2.new(0.840260386, 0, 0.0225472748, 0)
+RemoteIcon2.Size = UDim2.new(0, 24, 0, 24)
+RemoteIcon2.ZIndex = 21
+RemoteIcon2.Image = functionImage
 
-画像ボタン.Parent = ヘッダー
-画像ボタン.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-画像ボタン.BackgroundTransparency = 1.000
-画像ボタン.Position = UDim2.new(0, 8, 0, 8)
-画像ボタン.Size = UDim2.new(0, 18, 0, 18)
-画像ボタン.ZIndex = 9
-画像ボタン.Image = "rbxassetid://169476802"
-画像ボタン.ImageColor3 = Color3.fromRGB(53, 53, 53)
-画像ボタン.MouseButton1Click:Connect(function()
-    ブラウザヘッダー.Visible = not ブラウザヘッダー.Visible
+local browsedRemotes = {}
+local browsedConnections = {}
+local browsedButtonOffset = 10
+local browserCanvasSize = 286
+
+ImageButton.Parent = Header
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BackgroundTransparency = 1.000
+ImageButton.Position = UDim2.new(0, 8, 0, 8)
+ImageButton.Size = UDim2.new(0, 18, 0, 18)
+ImageButton.ZIndex = 9
+ImageButton.Image = "rbxassetid://169476802"
+ImageButton.ImageColor3 = Color3.fromRGB(53, 53, 53)
+ImageButton.MouseButton1Click:Connect(function()
+    BrowserHeader.Visible = not BrowserHeader.Visible
     for i, v in pairs(game:GetDescendants()) do
-        if タイプ確認(v, "RemoteEvent") or タイプ確認(v, "RemoteFunction") then
-            local ブラウザボタン = 複製(ブラウザリモートボタン) -- bButton
-            ブラウザボタン.Parent = リモートブラウザフレーム
-            ブラウザボタン.Visible = true
-            ブラウザボタン.Position = UDim2.new(0, 17, 0, ブラウザボタンオフセット)
-            local 発火関数 = "" -- fireFunction
-            if タイプ確認(v, "RemoteEvent") then
-                発火関数 = ":FireServer()" -- fireFunction
-                ブラウザボタン.ブラウザリモートアイコン.Image = イベント画像 -- eventImage
+        if isA(v, "RemoteEvent") or isA(v, "RemoteFunction") then
+            local bButton = clone(RemoteButton2)
+            bButton.Parent = RemoteBrowserFrame
+            bButton.Visible = true
+            bButton.Position = UDim2.new(0, 17, 0, browsedButtonOffset)
+            local fireFunction = ""
+            if isA(v, "RemoteEvent") then
+                fireFunction = ":FireServer()"
+                bButton.RemoteIcon2.Image = eventImage
             else
-                発火関数 = ":InvokeServer()" -- fireFunction
+                fireFunction = ":InvokeServer()"
             end
-            ブラウザボタン.ブラウザリモート名.Text = v.Name
-            local 接続 = ブラウザボタン.MouseButton1Click:Connect(function() -- connection
-                setclipboard(インスタンスの完全パスを取得(v)..発火関数) -- fireFunction
+            bButton.RemoteName2.Text = v.Name
+            local connection = bButton.MouseButton1Click:Connect(function()
+                setclipboard(GetFullPathOfAnInstance(v)..fireFunction)
             end)
-            table.insert(閲覧済み接続, 接続) -- browsedConnections
-            ブラウザボタンオフセット = ブラウザボタンオフセット + 35
+            table.insert(browsedConnections, connection)
+            browsedButtonOffset = browsedButtonOffset + 35
 
-            if #閲覧済み接続 > 8 then -- browsedConnections
-                ブラウザキャンバスサイズ = ブラウザキャンバスサイズ + 35 -- browserCanvasSize
-                リモートブラウザフレーム.CanvasSize = UDim2.new(0, 0, 0, ブラウザキャンバスサイズ) -- browserCanvasSize
+            if #browsedConnections > 8 then
+                browserCanvasSize = browserCanvasSize + 35
+                RemoteBrowserFrame.CanvasSize = UDim2.new(0, 0, 0, browserCanvasSize)
             end
         end
     end
 end)
 
-マウス.KeyDown:Connect(function(キー) -- key
-    if キー:lower() == 設定["キーバインド"]:lower() then -- settings["Keybind"]
+mouse.KeyDown:Connect(function(key)
+    if key:lower() == settings["Keybind"]:lower() then
         TurtleSpyGUI.Enabled = not TurtleSpyGUI.Enabled
     end
 end)
 
-ヘッダー.Name = "ヘッダー" -- Header
-ヘッダー.Parent = メインフレーム
-ヘッダー.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-ヘッダー.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-ヘッダー.Size = UDim2.new(0, 207, 0, 26)
-ヘッダー.ZIndex = 9
+Header.Name = "Header"
+Header.Parent = mainFrame
+Header.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+Header.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+Header.Size = UDim2.new(0, 207, 0, 26)
+Header.ZIndex = 9
 
-ヘッダー陰影.Name = "ヘッダー陰影" -- HeaderShading
-ヘッダー陰影.Parent = ヘッダー
-ヘッダー陰影.BackgroundColor3 = 色設定["メイン"]["ヘッダー陰影色"] -- colorSettings["Main"]["HeaderShadingColor"]
-ヘッダー陰影.BorderColor3 = 色設定["メイン"]["ヘッダー陰影色"] -- colorSettings["Main"]["HeaderShadingColor"]
-ヘッダー陰影.Position = UDim2.new(1.46719131e-07, 0, 0.285714358, 0)
-ヘッダー陰影.Size = UDim2.new(0, 207, 0, 27)
-ヘッダー陰影.ZIndex = 8
+HeaderShading.Name = "HeaderShading"
+HeaderShading.Parent = Header
+HeaderShading.BackgroundColor3 = colorSettings["Main"]["HeaderShadingColor"]
+HeaderShading.BorderColor3 = colorSettings["Main"]["HeaderShadingColor"]
+HeaderShading.Position = UDim2.new(1.46719131e-07, 0, 0.285714358, 0)
+HeaderShading.Size = UDim2.new(0, 207, 0, 27)
+HeaderShading.ZIndex = 8
 
-ヘッダーテキストラベル.Name = "ヘッダーテキストラベル" -- HeaderTextLabel
-ヘッダーテキストラベル.Parent = ヘッダー陰影
-ヘッダーテキストラベル.BackgroundTransparency = 1.000
-ヘッダーテキストラベル.Position = UDim2.new(-0.00507604145, 0, -0.202857122, 0)
-ヘッダーテキストラベル.Size = UDim2.new(0, 215, 0, 29)
-ヘッダーテキストラベル.ZIndex = 10
-ヘッダーテキストラベル.Font = Enum.Font.SourceSans
-ヘッダーテキストラベル.Text = "タートルスパイ / Turtle Spy"
-ヘッダーテキストラベル.TextColor3 = 色設定["メイン"]["ヘッダーテキスト色"] -- colorSettings["Main"]["HeaderTextColor"]
-ヘッダーテキストラベル.TextSize = 17.000
+HeaderTextLabel.Name = "HeaderTextLabel"
+HeaderTextLabel.Parent = HeaderShading
+HeaderTextLabel.BackgroundTransparency = 1.000
+HeaderTextLabel.Position = UDim2.new(-0.00507604145, 0, -0.202857122, 0)
+HeaderTextLabel.Size = UDim2.new(0, 215, 0, 29)
+HeaderTextLabel.ZIndex = 10
+HeaderTextLabel.Font = Enum.Font.SourceSans
+HeaderTextLabel.Text = "タートルスパイ\nTurtle Spy"
+HeaderTextLabel.TextColor3 = colorSettings["Main"]["HeaderTextColor"]
+HeaderTextLabel.TextSize = 14.000
 
-リモートスクロールフレーム.Name = "リモートスクロールフレーム" -- RemoteScrollFrame
-リモートスクロールフレーム.Parent = メインフレーム
-リモートスクロールフレーム.Active = true
-リモートスクロールフレーム.BackgroundColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-リモートスクロールフレーム.BorderColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-リモートスクロールフレーム.Position = UDim2.new(0, 0, 1.02292562, 0)
-リモートスクロールフレーム.Size = UDim2.new(0, 207, 0, 286)
-リモートスクロールフレーム.CanvasSize = UDim2.new(0, 0, 0, 287)
-リモートスクロールフレーム.ScrollBarThickness = 8
-リモートスクロールフレーム.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
-リモートスクロールフレーム.ScrollBarImageColor3 = 色設定["メイン"]["スクロールバー画像色"] -- colorSettings["Main"]["ScrollBarImageColor"]
+RemoteScrollFrame.Name = "RemoteScrollFrame"
+RemoteScrollFrame.Parent = mainFrame
+RemoteScrollFrame.Active = true
+RemoteScrollFrame.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
+RemoteScrollFrame.BorderColor3 = Color3.fromRGB(47, 54, 64)
+RemoteScrollFrame.Position = UDim2.new(0, 0, 1.02292562, 0)
+RemoteScrollFrame.Size = UDim2.new(0, 207, 0, 286)
+RemoteScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 287)
+RemoteScrollFrame.ScrollBarThickness = 8
+RemoteScrollFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
+RemoteScrollFrame.ScrollBarImageColor3 = colorSettings["Main"]["ScrollBarImageColor"]
 
-リモートボタン.Name = "リモートボタン" -- RemoteButton
-リモートボタン.Parent = リモートスクロールフレーム
-リモートボタン.BackgroundColor3 = 色設定["リモートボタン"]["背景色"] -- colorSettings["RemoteButtons"]["BackgroundColor"]
-リモートボタン.BorderColor3 = 色設定["リモートボタン"]["境界線色"] -- colorSettings["RemoteButtons"]["BorderColor"]
-リモートボタン.Position = UDim2.new(0, 17, 0, 10)
-リモートボタン.Size = UDim2.new(0, 182, 0, 26)
-リモートボタン.Selected = true
-リモートボタン.Font = Enum.Font.SourceSans
-リモートボタン.Text = ""
-リモートボタン.TextColor3 = Color3.fromRGB(220, 221, 225)
-リモートボタン.TextSize = 18.000
-リモートボタン.TextStrokeTransparency = 123.000
-リモートボタン.TextWrapped = true
-リモートボタン.TextXAlignment = Enum.TextXAlignment.Left
-リモートボタン.Visible = false
+RemoteButton.Name = "RemoteButton"
+RemoteButton.Parent = RemoteScrollFrame
+RemoteButton.BackgroundColor3 = colorSettings["RemoteButtons"]["BackgroundColor"]
+RemoteButton.BorderColor3 = colorSettings["RemoteButtons"]["BorderColor"]
+RemoteButton.Position = UDim2.new(0, 17, 0, 10)
+RemoteButton.Size = UDim2.new(0, 182, 0, 26)
+RemoteButton.Selected = true
+RemoteButton.Font = Enum.Font.SourceSans
+RemoteButton.Text = ""
+RemoteButton.TextColor3 = Color3.fromRGB(220, 221, 225)
+RemoteButton.TextSize = 18.000
+RemoteButton.TextStrokeTransparency = 123.000
+RemoteButton.TextWrapped = true
+RemoteButton.TextXAlignment = Enum.TextXAlignment.Left
+RemoteButton.Visible = false
 
-数字.Name = "数字" -- Number
-数字.Parent = リモートボタン
-数字.BackgroundTransparency = 1.000
-数字.Position = UDim2.new(0, 5, 0, 0)
-数字.Size = UDim2.new(0, 300, 0, 26)
-数字.ZIndex = 2
-数字.Font = Enum.Font.SourceSans
-数字.Text = "1"
-数字.TextColor3 = 色設定["リモートボタン"]["数字テキスト色"] -- colorSettings["RemoteButtons"]["NumberTextColor"]
-数字.TextSize = 16.000
-数字.TextWrapped = true
-数字.TextXAlignment = Enum.TextXAlignment.Left
+Number.Name = "Number"
+Number.Parent = RemoteButton
+Number.BackgroundTransparency = 1.000
+Number.Position = UDim2.new(0, 5, 0, 0)
+Number.Size = UDim2.new(0, 300, 0, 26)
+Number.ZIndex = 2
+Number.Font = Enum.Font.SourceSans
+Number.Text = "1"
+Number.TextColor3 = colorSettings["RemoteButtons"]["NumberTextColor"]
+Number.TextSize = 16.000
+Number.TextWrapped = true
+Number.TextXAlignment = Enum.TextXAlignment.Left
 
-リモート名.Name = "リモート名" -- RemoteName
-リモート名.Parent = リモートボタン
-リモート名.BackgroundTransparency = 1.000
-リモート名.Position = UDim2.new(0, 20, 0, 0)
-リモート名.Size = UDim2.new(0, 134, 0, 26)
-リモート名.Font = Enum.Font.SourceSans
-リモート名.Text = "RemoteEvent"
-リモート名.TextColor3 = 色設定["リモートボタン"]["テキスト色"] -- colorSettings["RemoteButtons"]["TextColor"]
-リモート名.TextSize = 16.000
-リモート名.TextXAlignment = Enum.TextXAlignment.Left
-リモート名.TextTruncate = 1
+RemoteName.Name = "RemoteName"
+RemoteName.Parent = RemoteButton
+RemoteName.BackgroundTransparency = 1.000
+RemoteName.Position = UDim2.new(0, 20, 0, 0)
+RemoteName.Size = UDim2.new(0, 134, 0, 26)
+RemoteName.Font = Enum.Font.SourceSans
+RemoteName.Text = "RemoteEvent"
+RemoteName.TextColor3 = colorSettings["RemoteButtons"]["TextColor"]
+RemoteName.TextSize = 16.000
+RemoteName.TextXAlignment = Enum.TextXAlignment.Left
+RemoteName.TextTruncate = 1
 
-リモートアイコン.Name = "リモートアイコン" -- RemoteIcon
-リモートアイコン.Parent = リモートボタン
-リモートアイコン.BackgroundTransparency = 1.000
-リモートアイコン.Position = UDim2.new(0.840260386, 0, 0.0225472748, 0)
-リモートアイコン.Size = UDim2.new(0, 24, 0, 24)
-リモートアイコン.Image = "http://www.roblox.com/asset/?id=413369506"
+RemoteIcon.Name = "RemoteIcon"
+RemoteIcon.Parent = RemoteButton
+RemoteIcon.BackgroundTransparency = 1.000
+RemoteIcon.Position = UDim2.new(0.840260386, 0, 0.0225472748, 0)
+RemoteIcon.Size = UDim2.new(0, 24, 0, 24)
+RemoteIcon.Image = "http://www.roblox.com/asset/?id=413369506"
 
-情報フレーム.Name = "情報フレーム" -- InfoFrame
-情報フレーム.Parent = メインフレーム
-情報フレーム.BackgroundColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-情報フレーム.BorderColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-情報フレーム.Position = UDim2.new(0.368141592, 0, -5.58035717e-05, 0)
-情報フレーム.Size = UDim2.new(0, 357, 0, 322)
-情報フレーム.Visible = false
-情報フレーム.ZIndex = 6
+InfoFrame.Name = "InfoFrame"
+InfoFrame.Parent = mainFrame
+InfoFrame.BackgroundColor3 = colorSettings["Main"]["MainBackgroundColor"]
+InfoFrame.BorderColor3 = colorSettings["Main"]["MainBackgroundColor"]
+InfoFrame.Position = UDim2.new(0.368141592, 0, -5.58035717e-05, 0)
+InfoFrame.Size = UDim2.new(0, 357, 0, 322)
+InfoFrame.Visible = false
+InfoFrame.ZIndex = 6
 
-情報フレームヘッダー.Name = "情報フレームヘッダー" -- InfoFrameHeader
-情報フレームヘッダー.Parent = 情報フレーム
-情報フレームヘッダー.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-情報フレームヘッダー.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-情報フレームヘッダー.Size = UDim2.new(0, 357, 0, 26)
-情報フレームヘッダー.ZIndex = 14
+InfoFrameHeader.Name = "InfoFrameHeader"
+InfoFrameHeader.Parent = InfoFrame
+InfoFrameHeader.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+InfoFrameHeader.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+InfoFrameHeader.Size = UDim2.new(0, 357, 0, 26)
+InfoFrameHeader.ZIndex = 14
 
-情報タイトル陰影.Name = "情報タイトル陰影" -- InfoTitleShading
-情報タイトル陰影.Parent = 情報フレーム
-情報タイトル陰影.BackgroundColor3 = 色設定["メイン"]["ヘッダー陰影色"] -- colorSettings["Main"]["HeaderShadingColor"]
-情報タイトル陰影.BorderColor3 = 色設定["メイン"]["ヘッダー陰影色"] -- colorSettings["Main"]["HeaderShadingColor"]
-情報タイトル陰影.Position = UDim2.new(-0.00280881394, 0, 0, 0)
-情報タイトル陰影.Size = UDim2.new(0, 358, 0, 34)
-情報タイトル陰影.ZIndex = 13
+InfoTitleShading.Name = "InfoTitleShading"
+InfoTitleShading.Parent = InfoFrame
+InfoTitleShading.BackgroundColor3 = colorSettings["Main"]["HeaderShadingColor"]
+InfoTitleShading.BorderColor3 = colorSettings["Main"]["HeaderShadingColor"]
+InfoTitleShading.Position = UDim2.new(-0.00280881394, 0, 0, 0)
+InfoTitleShading.Size = UDim2.new(0, 358, 0, 34)
+InfoTitleShading.ZIndex = 13
 
-コードフレーム.Name = "コードフレーム" -- CodeFrame
-コードフレーム.Parent = 情報フレーム
-コードフレーム.Active = true
-コードフレーム.BackgroundColor3 = 色設定["コード"]["背景色"] -- colorSettings["Code"]["BackgroundColor"]
-コードフレーム.BorderColor3 = 色設定["コード"]["背景色"] -- colorSettings["Code"]["BackgroundColor"]
-コードフレーム.Position = UDim2.new(0.0391303748, 0, 0.141156405, 0)
-コードフレーム.Size = UDim2.new(0, 329, 0, 63)
-コードフレーム.ZIndex = 16
-コードフレーム.CanvasSize = UDim2.new(0, 670, 2, 0)
-コードフレーム.ScrollBarThickness = 8
-コードフレーム.ScrollingDirection = 1
-コードフレーム.ScrollBarImageColor3 = 色設定["メイン"]["スクロールバー画像色"] -- colorSettings["Main"]["ScrollBarImageColor"]
+CodeFrame.Name = "CodeFrame"
+CodeFrame.Parent = InfoFrame
+CodeFrame.Active = true
+CodeFrame.BackgroundColor3 = colorSettings["Code"]["BackgroundColor"]
+CodeFrame.BorderColor3 = colorSettings["Code"]["BackgroundColor"]
+CodeFrame.Position = UDim2.new(0.0391303748, 0, 0.141156405, 0)
+CodeFrame.Size = UDim2.new(0, 329, 0, 63)
+CodeFrame.ZIndex = 16
+CodeFrame.CanvasSize = UDim2.new(0, 670, 2, 0)
+CodeFrame.ScrollBarThickness = 8
+CodeFrame.ScrollingDirection = 1
+CodeFrame.ScrollBarImageColor3 = colorSettings["Main"]["ScrollBarImageColor"]
 
-コード.Name = "コード" -- Code
-コード.Parent = コードフレーム
-コード.BackgroundTransparency = 1.000
-コード.Position = UDim2.new(0.00888902973, 0, 0.0394801199, 0)
-コード.Size = UDim2.new(0, 100000, 0, 25)
-コード.ZIndex = 18
-コード.Font = Enum.Font.SourceSans
-コード.Text = "Turtle Spyをご利用いただきありがとうございます！ :D / Thanks for using Turtle Spy! :D"
-コード.TextColor3 = 色設定["コード"]["テキスト色"] -- colorSettings["Code"]["TextColor"]
-コード.TextSize = 14.000
-コード.TextWrapped = true
-コード.TextXAlignment = Enum.TextXAlignment.Left
+Code.Name = "Code"
+Code.Parent = CodeFrame
+Code.BackgroundTransparency = 1.000
+Code.Position = UDim2.new(0.00888902973, 0, 0.0394801199, 0)
+Code.Size = UDim2.new(0, 100000, 0, 25)
+Code.ZIndex = 18
+Code.Font = Enum.Font.SourceSans
+Code.Text = "Turtle Spyをご利用いただきありがとうございます！ :D\nThanks for using Turtle Spy! :D"
+Code.TextColor3 = colorSettings["Code"]["TextColor"]
+Code.TextSize = 12.000
+Code.TextWrapped = true
+Code.TextXAlignment = Enum.TextXAlignment.Left
 
-コードコメント.Name = "コードコメント" -- CodeComment
-コードコメント.Parent = コードフレーム
-コードコメント.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-コードコメント.BackgroundTransparency = 1.000
-コードコメント.Position = UDim2.new(0.0119285434, 0, -0.001968503, 0)
-コードコメント.Size = UDim2.new(0, 1000, 0, 25)
-コードコメント.ZIndex = 18
-コードコメント.Font = Enum.Font.SourceSans
-コードコメント.Text = "-- TurtleSpyによって生成されたスクリプト、作成者: Intrer#0421 / -- Script generated by TurtleSpy, made by Intrer#0421"
-コードコメント.TextColor3 = 色設定["コード"]["クレジット色"] -- colorSettings["Code"]["CreditsColor"]
-コードコメント.TextSize = 14.000
-コードコメント.TextXAlignment = Enum.TextXAlignment.Left
+CodeComment.Name = "CodeComment"
+CodeComment.Parent = CodeFrame
+CodeComment.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CodeComment.BackgroundTransparency = 1.000
+CodeComment.Position = UDim2.new(0.0119285434, 0, -0.001968503, 0)
+CodeComment.Size = UDim2.new(0, 1000, 0, 25)
+CodeComment.ZIndex = 18
+CodeComment.Font = Enum.Font.SourceSans
+CodeComment.Text = "-- TurtleSpyによって生成されたスクリプト、製作者：Intrer#0421\n-- Script generated by TurtleSpy, made by Intrer#0421"
+CodeComment.TextColor3 = colorSettings["Code"]["CreditsColor"]
+CodeComment.TextSize = 11.000
+CodeComment.TextXAlignment = Enum.TextXAlignment.Left
 
-情報ヘッダーテキスト.Name = "情報ヘッダーテキスト" -- InfoHeaderText
-情報ヘッダーテキスト.Parent = 情報フレーム
-情報ヘッダーテキスト.BackgroundTransparency = 1.000
-情報ヘッダーテキスト.Position = UDim2.new(0.0391303934, 0, -0.00206972216, 0)
-情報ヘッダーテキスト.Size = UDim2.new(0, 342, 0, 35)
-情報ヘッダーテキスト.ZIndex = 18
-情報ヘッダーテキスト.Font = Enum.Font.SourceSans
-情報ヘッダーテキスト.Text = "情報: RemoteFunction / Info: RemoteFunction"
-情報ヘッダーテキスト.TextColor3 = 色設定["メイン"]["ヘッダーテキスト色"] -- colorSettings["Main"]["HeaderTextColor"]
-情報ヘッダーテキスト.TextSize = 17.000
+InfoHeaderText.Name = "InfoHeaderText"
+InfoHeaderText.Parent = InfoFrame
+InfoHeaderText.BackgroundTransparency = 1.000
+InfoHeaderText.Position = UDim2.new(0.0391303934, 0, -0.00206972216, 0)
+InfoHeaderText.Size = UDim2.new(0, 342, 0, 35)
+InfoHeaderText.ZIndex = 18
+InfoHeaderText.Font = Enum.Font.SourceSans
+InfoHeaderText.Text = "情報: RemoteFunction\nInfo: RemoteFunction"
+InfoHeaderText.TextColor3 = colorSettings["Main"]["HeaderTextColor"]
+InfoHeaderText.TextSize = 14.000
 
-情報ボタンスクロール.Name = "情報ボタンスクロール" -- InfoButtonsScroll
-情報ボタンスクロール.Parent = 情報フレーム
-情報ボタンスクロール.Active = true
-情報ボタンスクロール.BackgroundColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-情報ボタンスクロール.BorderColor3 = 色設定["メイン"]["メイン背景色"] -- colorSettings["Main"]["MainBackgroundColor"]
-情報ボタンスクロール.Position = UDim2.new(0.0391303748, 0, 0.355857909, 0)
-情報ボタンスクロール.Size = UDim2.new(0, 329, 0, 199)
-情報ボタンスクロール.ZIndex = 11
-情報ボタンスクロール.CanvasSize = UDim2.new(0, 0, 1, 0)
-情報ボタンスクロール.ScrollBarThickness = 8
-情報ボタンスクロール.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
-情報ボタンスクロール.ScrollBarImageColor3 = 色設定["メイン"]["スクロールバー画像色"] -- colorSettings["Main"]["ScrollBarImageColor"]
+InfoButtonsScroll.Name = "InfoButtonsScroll"
+InfoButtonsScroll.Parent = InfoFrame
+InfoButtonsScroll.Active = true
+InfoButtonsScroll.BackgroundColor3 = colorSettings["Main"]["MainBackgroundColor"]
+InfoButtonsScroll.BorderColor3 = colorSettings["Main"]["MainBackgroundColor"]
+InfoButtonsScroll.Position = UDim2.new(0.0391303748, 0, 0.355857909, 0)
+InfoButtonsScroll.Size = UDim2.new(0, 329, 0, 199)
+InfoButtonsScroll.ZIndex = 11
+InfoButtonsScroll.CanvasSize = UDim2.new(0, 0, 1, 0)
+InfoButtonsScroll.ScrollBarThickness = 8
+InfoButtonsScroll.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
+InfoButtonsScroll.ScrollBarImageColor3 = colorSettings["Main"]["ScrollBarImageColor"]
 
-コードコピー.Name = "コードコピー" -- CopyCode
-コードコピー.Parent = 情報ボタンスクロール
-コードコピー.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-コードコピー.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-コードコピー.Position = UDim2.new(0.0645, 0, 0, 10)
-コードコピー.Size = UDim2.new(0, 294, 0, 26)
-コードコピー.ZIndex = 15
-コードコピー.Font = Enum.Font.SourceSans
-コードコピー.Text = "コードをコピー / Copy code"
-コードコピー.TextColor3 = Color3.fromRGB(250, 251, 255)
-コードコピー.TextSize = 16.000
+CopyCode.Name = "CopyCode"
+CopyCode.Parent = InfoButtonsScroll
+CopyCode.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+CopyCode.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+CopyCode.Position = UDim2.new(0.0645, 0, 0, 10)
+CopyCode.Size = UDim2.new(0, 294, 0, 26)
+CopyCode.ZIndex = 15
+CopyCode.Font = Enum.Font.SourceSans
+CopyCode.Text = "コードをコピー\nCopy code"
+CopyCode.TextColor3 = Color3.fromRGB(250, 251, 255)
+CopyCode.TextSize = 13.000
 
-コード実行.Name = "コード実行" -- RunCode
-コード実行.Parent = 情報ボタンスクロール
-コード実行.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-コード実行.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-コード実行.Position = UDim2.new(0.0645, 0, 0, 45)
-コード実行.Size = UDim2.new(0, 294, 0, 26)
-コード実行.ZIndex = 15
-コード実行.Font = Enum.Font.SourceSans
-コード実行.Text = "実行 / Execute"
-コード実行.TextColor3 = Color3.fromRGB(250, 251, 255)
-コード実行.TextSize = 16.000
+RunCode.Name = "RunCode"
+RunCode.Parent = InfoButtonsScroll
+RunCode.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+RunCode.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+RunCode.Position = UDim2.new(0.0645, 0, 0, 45)
+RunCode.Size = UDim2.new(0, 294, 0, 26)
+RunCode.ZIndex = 15
+RunCode.Font = Enum.Font.SourceSans
+RunCode.Text = "実行\nExecute"
+RunCode.TextColor3 = Color3.fromRGB(250, 251, 255)
+RunCode.TextSize = 13.000
 
-スクリプトパスコピー.Name = "スクリプトパスコピー" -- CopyScriptPath
-スクリプトパスコピー.Parent = 情報ボタンスクロール
-スクリプトパスコピー.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-スクリプトパスコピー.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-スクリプトパスコピー.Position = UDim2.new(0.0645, 0, 0, 80)
-スクリプトパスコピー.Size = UDim2.new(0, 294, 0, 26)
-スクリプトパスコピー.ZIndex = 15
-スクリプトパスコピー.Font = Enum.Font.SourceSans
-スクリプトパスコピー.Text = "スクリプトパスをコピー / Copy script path"
-スクリプトパスコピー.TextColor3 = Color3.fromRGB(250, 251, 255)
-スクリプトパスコピー.TextSize = 16.000
+CopyScriptPath.Name = "CopyScriptPath"
+CopyScriptPath.Parent = InfoButtonsScroll
+CopyScriptPath.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+CopyScriptPath.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+CopyScriptPath.Position = UDim2.new(0.0645, 0, 0, 80)
+CopyScriptPath.Size = UDim2.new(0, 294, 0, 26)
+CopyScriptPath.ZIndex = 15
+CopyScriptPath.Font = Enum.Font.SourceSans
+CopyScriptPath.Text = "スクリプトパスをコピー\nCopy script path"
+CopyScriptPath.TextColor3 = Color3.fromRGB(250, 251, 255)
+CopyScriptPath.TextSize = 13.000
 
-逆コンパイルコピー.Name = "逆コンパイルコピー" -- CopyDecompiled
-逆コンパイルコピー.Parent = 情報ボタンスクロール
-逆コンパイルコピー.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-逆コンパイルコピー.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-逆コンパイルコピー.Position = UDim2.new(0.0645, 0, 0, 115)
-逆コンパイルコピー.Size = UDim2.new(0, 294, 0, 26)
-逆コンパイルコピー.ZIndex = 15
-逆コンパイルコピー.Font = Enum.Font.SourceSans
-逆コンパイルコピー.Text = "逆コンパイルスクリプトをコピー / Copy decompiled script"
-逆コンパイルコピー.TextColor3 = Color3.fromRGB(250, 251, 255)
-逆コンパイルコピー.TextSize = 16.000
+CopyDecompiled.Name = "CopyDecompiled"
+CopyDecompiled.Parent = InfoButtonsScroll
+CopyDecompiled.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+CopyDecompiled.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+CopyDecompiled.Position = UDim2.new(0.0645, 0, 0, 115)
+CopyDecompiled.Size = UDim2.new(0, 294, 0, 26)
+CopyDecompiled.ZIndex = 15
+CopyDecompiled.Font = Enum.Font.SourceSans
+CopyDecompiled.Text = "逆コンパイルしたスクリプトをコピー\nCopy decompiled script"
+CopyDecompiled.TextColor3 = Color3.fromRGB(250, 251, 255)
+CopyDecompiled.TextSize = 13.000
 
-リモート無視.Name = "リモート無視" -- IgnoreRemote
-リモート無視.Parent = 情報ボタンスクロール
-リモート無視.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-リモート無視.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-リモート無視.Position = UDim2.new(0.0645, 0, 0, 185)
-リモート無視.Size = UDim2.new(0, 294, 0, 26)
-リモート無視.ZIndex = 15
-リモート無視.Font = Enum.Font.SourceSans
-リモート無視.Text = "リモートを無視 / Ignore remote"
-リモート無視.TextColor3 = Color3.fromRGB(250, 251, 255)
-リモート無視.TextSize = 16.000
+IgnoreRemote.Name = "IgnoreRemote"
+IgnoreRemote.Parent = InfoButtonsScroll
+IgnoreRemote.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+IgnoreRemote.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+IgnoreRemote.Position = UDim2.new(0.0645, 0, 0, 185)
+IgnoreRemote.Size = UDim2.new(0, 294, 0, 26)
+IgnoreRemote.ZIndex = 15
+IgnoreRemote.Font = Enum.Font.SourceSans
+IgnoreRemote.Text = "リモートを無視\nIgnore remote"
+IgnoreRemote.TextColor3 = Color3.fromRGB(250, 251, 255)
+IgnoreRemote.TextSize = 13.000
 
-リモートブロック.Name = "リモートブロック" -- Block Remote
-リモートブロック.Parent = 情報ボタンスクロール
-リモートブロック.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-リモートブロック.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-リモートブロック.Position = UDim2.new(0.0645, 0, 0, 220)
-リモートブロック.Size = UDim2.new(0, 294, 0, 26)
-リモートブロック.ZIndex = 15
-リモートブロック.Font = Enum.Font.SourceSans
-リモートブロック.Text = "リモートの発火をブロック / Block remote from firing"
-リモートブロック.TextColor3 = Color3.fromRGB(250, 251, 255)
-リモートブロック.TextSize = 16.000
+BlockRemote.Name = "Block Remote"
+BlockRemote.Parent = InfoButtonsScroll
+BlockRemote.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+BlockRemote.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+BlockRemote.Position = UDim2.new(0.0645, 0, 0, 220)
+BlockRemote.Size = UDim2.new(0, 294, 0, 26)
+BlockRemote.ZIndex = 15
+BlockRemote.Font = Enum.Font.SourceSans
+BlockRemote.Text = "リモートの発火をブロック\nBlock remote from firing"
+BlockRemote.TextColor3 = Color3.fromRGB(250, 251, 255)
+BlockRemote.TextSize = 13.000
 
-無限ループ生成.Name = "無限ループ生成" -- WhileLoop
-無限ループ生成.Parent = 情報ボタンスクロール
-無限ループ生成.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-無限ループ生成.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-無限ループ生成.Position = UDim2.new(0.0645, 0, 0, 290)
-無限ループ生成.Size = UDim2.new(0, 294, 0, 26)
-無限ループ生成.ZIndex = 15
-無限ループ生成.Font = Enum.Font.SourceSans
-無限ループ生成.Text = "無限ループスクリプトを生成 / Generate while loop script"
-無限ループ生成.TextColor3 = Color3.fromRGB(250, 251, 255)
-無限ループ生成.TextSize = 16.000
+WhileLoop.Name = "WhileLoop"
+WhileLoop.Parent = InfoButtonsScroll
+WhileLoop.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+WhileLoop.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+WhileLoop.Position = UDim2.new(0.0645, 0, 0, 290)
+WhileLoop.Size = UDim2.new(0, 294, 0, 26)
+WhileLoop.ZIndex = 15
+WhileLoop.Font = Enum.Font.SourceSans
+WhileLoop.Text = "whileループスクリプトを生成\nGenerate while loop script"
+WhileLoop.TextColor3 = Color3.fromRGB(250, 251, 255)
+WhileLoop.TextSize = 13.000
 
-クリア.Name = "クリア" -- Clear
-クリア.Parent = 情報ボタンスクロール
-クリア.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-クリア.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-クリア.Position = UDim2.new(0.0645, 0, 0, 255)
-クリア.Size = UDim2.new(0, 294, 0, 26)
-クリア.ZIndex = 15
-クリア.Font = Enum.Font.SourceSans
-クリア.Text = "ログをクリア / Clear logs"
-クリア.TextColor3 = Color3.fromRGB(250, 251, 255)
-クリア.TextSize = 16.000
+Clear.Name = "Clear"
+Clear.Parent = InfoButtonsScroll
+Clear.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+Clear.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+Clear.Position = UDim2.new(0.0645, 0, 0, 255)
+Clear.Size = UDim2.new(0, 294, 0, 26)
+Clear.ZIndex = 15
+Clear.Font = Enum.Font.SourceSans
+Clear.Text = "ログをクリア\nClear logs"
+Clear.TextColor3 = Color3.fromRGB(250, 251, 255)
+Clear.TextSize = 13.000
 
-戻り値コピー.Name = "戻り値コピー" -- CopyReturn
-戻り値コピー.Parent = 情報ボタンスクロール
-戻り値コピー.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-戻り値コピー.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-戻り値コピー.Position = UDim2.new(0.0645, 0, 0, 325)
-戻り値コピー.Size = UDim2.new(0, 294, 0, 26)
-戻り値コピー.ZIndex = 15
-戻り値コピー.Font = Enum.Font.SourceSans
-戻り値コピー.Text = "実行して戻り値をコピー / Execute and copy return value"
-戻り値コピー.TextColor3 = Color3.fromRGB(250, 251, 255)
-戻り値コピー.TextSize = 16.000
+CopyReturn.Name = "CopyReturn"
+CopyReturn.Parent = InfoButtonsScroll
+CopyReturn.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+CopyReturn.BorderColor3 = colorSettings["MainButtons"]["BorderColor"]
+CopyReturn.Position = UDim2.new(0.0645, 0, 0, 325)
+CopyReturn.Size = UDim2.new(0, 294, 0, 26)
+CopyReturn.ZIndex = 15
+CopyReturn.Font = Enum.Font.SourceSans
+CopyReturn.Text = "実行して戻り値をコピー\nExecute and copy return value"
+CopyReturn.TextColor3 = Color3.fromRGB(250, 251, 255)
+CopyReturn.TextSize = 13.000
 
-積み上げ無効.Name = "積み上げ無効" -- DoNotStack
-積み上げ無効.Parent = 情報ボタンスクロール
-積み上げ無効.BackgroundColor3 = 色設定["メインボタン"]["背景色"] -- colorSettings["MainButtons"]["BackgroundColor"]
-積み上げ無効.BorderColor3 = 色設定["メインボタン"]["境界線色"] -- colorSettings["MainButtons"]["BorderColor"]
-積み上げ無効.Position = UDim2.new(0.0645, 0, 0, 150)
-積み上げ無効.Size = UDim2.new(0, 294, 0, 26)
-積み上げ無効.ZIndex = 15
-積み上げ無効.Font = Enum.Font.SourceSans
-積み上げ無効.Text = "新しい引数で発火されたら積み上げない / Unstack remote when fired with new args"
-積み上げ無効.TextColor3 = Color3.fromRGB(250, 251, 255)
-積み上げ無効.TextSize = 16.000
+DoNotStack.Name = "CopyReturn"
+DoNotStack.Parent = InfoButtonsScroll
+DoNotStack.BackgroundColor3 = colorSettings["MainButtons"]["BackgroundColor"]
+DoNotStack.BorderColor3 =  colorSettings["MainButtons"]["BorderColor"]
+DoNotStack.Position = UDim2.new(0.0645, 0, 0, 150)
+DoNotStack.Size = UDim2.new(0, 294, 0, 26)
+DoNotStack.ZIndex = 15
+DoNotStack.Font = Enum.Font.SourceSans
+DoNotStack.Text = "新しい引数で発火時にスタックを解除\nUnstack remote when fired with new args"
+DoNotStack.TextColor3 = Color3.fromRGB(250, 251, 255)
+DoNotStack.TextSize = 11.000
 
-フレーム仕切り.Name = "フレーム仕切り" -- FrameDivider
-フレーム仕切り.Parent = 情報フレーム
-フレーム仕切り.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-フレーム仕切り.BorderColor3 = Color3.fromRGB(53, 59, 72)
-フレーム仕切り.Position = UDim2.new(0, 3, 0, 0)
-フレーム仕切り.Size = UDim2.new(0, 4, 0, 322)
-フレーム仕切り.ZIndex = 7
+FrameDivider.Name = "FrameDivider"
+FrameDivider.Parent = InfoFrame
+FrameDivider.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
+FrameDivider.BorderColor3 = Color3.fromRGB(53, 59, 72)
+FrameDivider.Position = UDim2.new(0, 3, 0, 0)
+FrameDivider.Size = UDim2.new(0, 4, 0, 322)
+FrameDivider.ZIndex = 7
 
-local 情報フレーム開いている = false -- InfoFrameOpen
-情報フレーム閉じる.Name = "情報フレーム閉じる" -- CloseInfoFrame
-情報フレーム閉じる.Parent = 情報フレーム
-情報フレーム閉じる.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-情報フレーム閉じる.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-情報フレーム閉じる.Position = UDim2.new(0, 333, 0, 2)
-情報フレーム閉じる.Size = UDim2.new(0, 22, 0, 22)
-情報フレーム閉じる.ZIndex = 18
-情報フレーム閉じる.Font = Enum.Font.SourceSansLight
-情報フレーム閉じる.Text = "X"
-情報フレーム閉じる.TextColor3 = Color3.fromRGB(0, 0, 0)
-情報フレーム閉じる.TextSize = 20.000
-情報フレーム閉じる.MouseButton1Click:Connect(function()
-    情報フレーム.Visible = false
-    情報フレーム開いている = false -- InfoFrameOpen
-    メインフレーム.Size = UDim2.new(0, 207, 0, 35)
+local InfoFrameOpen = false
+CloseInfoFrame.Name = "CloseInfoFrame"
+CloseInfoFrame.Parent = InfoFrame
+CloseInfoFrame.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+CloseInfoFrame.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+CloseInfoFrame.Position = UDim2.new(0, 333, 0, 2)
+CloseInfoFrame.Size = UDim2.new(0, 22, 0, 22)
+CloseInfoFrame.ZIndex = 18
+CloseInfoFrame.Font = Enum.Font.SourceSansLight
+CloseInfoFrame.Text = "X"
+CloseInfoFrame.TextColor3 = Color3.fromRGB(0, 0, 0)
+CloseInfoFrame.TextSize = 20.000
+CloseInfoFrame.MouseButton1Click:Connect(function()
+    InfoFrame.Visible = false
+    InfoFrameOpen = false
+    mainFrame.Size = UDim2.new(0, 207, 0, 35)
 end)
 
-情報フレーム開く.Name = "情報フレーム開く" -- OpenInfoFrame
-情報フレーム開く.Parent = メインフレーム
-情報フレーム開く.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-情報フレーム開く.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-情報フレーム開く.Position = UDim2.new(0, 185, 0, 2)
-情報フレーム開く.Size = UDim2.new(0, 22, 0, 22)
-情報フレーム開く.ZIndex = 18
-情報フレーム開く.Font = Enum.Font.SourceSans
-情報フレーム開く.Text = ">"
-情報フレーム開く.TextColor3 = Color3.fromRGB(0, 0, 0)
-情報フレーム開く.TextSize = 16.000
-情報フレーム開く.MouseButton1Click:Connect(function()
-    if not 情報フレーム.Visible then
-        メインフレーム.Size = UDim2.new(0, 565, 0, 35)
-        情報フレーム開く.Text = "<"
-    elseif リモートスクロールフレーム.Visible then
-        メインフレーム.Size = UDim2.new(0, 207, 0, 35)
-        情報フレーム開く.Text = ">"
-    end
-    情報フレーム.Visible = not 情報フレーム.Visible
-    情報フレーム開いている = not 情報フレーム開いている -- InfoFrameOpen
+OpenInfoFrame.Name = "OpenInfoFrame"
+OpenInfoFrame.Parent = mainFrame
+OpenInfoFrame.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+OpenInfoFrame.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+OpenInfoFrame.Position = UDim2.new(0, 185, 0, 2)
+OpenInfoFrame.Size = UDim2.new(0, 22, 0, 22)
+OpenInfoFrame.ZIndex = 18
+OpenInfoFrame.Font = Enum.Font.SourceSans
+OpenInfoFrame.Text = ">"
+OpenInfoFrame.TextColor3 = Color3.fromRGB(0, 0, 0)
+OpenInfoFrame.TextSize = 16.000
+OpenInfoFrame.MouseButton1Click:Connect(function()
+	if not InfoFrame.Visible then
+		mainFrame.Size = UDim2.new(0, 565, 0, 35)
+		OpenInfoFrame.Text = "<"
+	elseif RemoteScrollFrame.Visible then
+		mainFrame.Size = UDim2.new(0, 207, 0, 35)
+		OpenInfoFrame.Text = ">"
+	end
+	InfoFrame.Visible = not InfoFrame.Visible
+	InfoFrameOpen = not InfoFrameOpen
 end)
 
-最小化.Name = "最小化" -- Minimize
-最小化.Parent = メインフレーム
-最小化.BackgroundColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-最小化.BorderColor3 = 色設定["メイン"]["ヘッダー色"] -- colorSettings["Main"]["HeaderColor"]
-最小化.Position = UDim2.new(0, 164, 0, 2)
-最小化.Size = UDim2.new(0, 22, 0, 22)
-最小化.ZIndex = 18
-最小化.Font = Enum.Font.SourceSans
-最小化.Text = "_"
-最小化.TextColor3 = Color3.fromRGB(0, 0, 0)
-最小化.TextSize = 16.000
-最小化.MouseButton1Click:Connect(function()
-    -- 閉じる / Close
-    if リモートスクロールフレーム.Visible then
-        メインフレーム.Size = UDim2.new(0, 207, 0, 35)
-        情報フレーム開く.Text = "<"
-        情報フレーム.Visible = false
-    else
-        -- 開く / Open
-        if 情報フレーム開いている then -- InfoFrameOpen
-            メインフレーム.Size = UDim2.new(0, 565, 0, 35)
-            情報フレーム開く.Text = "<"
-            情報フレーム.Visible = true
-        else
-            メインフレーム.Size = UDim2.new(0, 207, 0, 35)
-            情報フレーム開く.Text = ">"
-            情報フレーム.Visible = false
-        end
-    end
-    リモートスクロールフレーム.Visible = not リモートスクロールフレーム.Visible
+Minimize.Name = "Minimize"
+Minimize.Parent = mainFrame
+Minimize.BackgroundColor3 = colorSettings["Main"]["HeaderColor"]
+Minimize.BorderColor3 = colorSettings["Main"]["HeaderColor"]
+Minimize.Position = UDim2.new(0, 164, 0, 2)
+Minimize.Size = UDim2.new(0, 22, 0, 22)
+Minimize.ZIndex = 18
+Minimize.Font = Enum.Font.SourceSans
+Minimize.Text = "_"
+Minimize.TextColor3 = Color3.fromRGB(0, 0, 0)
+Minimize.TextSize = 16.000
+Minimize.MouseButton1Click:Connect(function()
+	-- Close
+	if RemoteScrollFrame.Visible then
+		mainFrame.Size = UDim2.new(0, 207, 0, 35)
+		OpenInfoFrame.Text = "<"
+		InfoFrame.Visible = false
+	else
+		--Open
+		if InfoFrameOpen then
+		    mainFrame.Size = UDim2.new(0, 565, 0, 35)
+		    OpenInfoFrame.Text = "<"
+			InfoFrame.Visible = true
+		else
+			mainFrame.Size = UDim2.new(0, 207, 0, 35)
+			OpenInfoFrame.Text = ">"
+			InfoFrame.Visible = false
+		end
+	end
+	RemoteScrollFrame.Visible = not RemoteScrollFrame.Visible
 end)
 
-local function リモートを検索(リモート, 引数) -- FindRemote(remote, args)
-    local 現在のID = (get_thread_context or syn.get_thread_identity)() -- currentId
+local function FindRemote(remote, args)
+    local currentId = (get_thread_context or syn.get_thread_identity)()
     ;(set_thread_context or syn.set_thread_identity)(7)
-    local 索引 -- i
-    if table.find(非積み上げリスト, リモート) then -- unstacked
-        local リモート数 = 0 -- numOfRemotes
-        for b, v in pairs(リモート一覧) do -- remotes
-            if v == リモート then
-                リモート数 = リモート数 + 1
-                for i2, v2 in pairs(リモート引数) do -- remoteArgs
-                    if table.unpack(リモート引数[b]) == table.unpack(引数) then
-                        索引 = b -- i
+    local i
+    if table.find(unstacked, remote) then
+    local numOfRemotes = 0
+        for b, v in pairs(remotes) do
+            if v == remote then
+                numOfRemotes = numOfRemotes + 1
+                for i2, v2 in pairs(remoteArgs) do
+                    if table.unpack(remoteArgs[b]) == table.unpack(args) then
+                        i = b
                     end
                 end
             end
         end
     else
-        索引 = table.find(リモート一覧, リモート) -- i
+        i = table.find(remotes, remote)
     end
-    ;(set_thread_context or syn.set_thread_identity)(現在のID) -- currentId
-    return 索引 -- i
+    ;(set_thread_context or syn.set_thread_identity)(currentId)
+    return i
 end
 
--- シンプルな色とテキスト変更効果を作成 / creates a simple color and text change effect
-local function ボタン効果(テキストラベル, テキスト) -- ButtonEffect(textlabel, text)
-    if not テキスト then
-        テキスト = "コピーしました！ / Copied!"
+-- creates a simple color and text change effect
+local function ButtonEffect(textlabel, text)
+    if not text then
+        text = "コピーしました！\nCopied!"
     end
-    local 元のテキスト = テキストラベル.Text -- orgText
-    local 元の色 = テキストラベル.TextColor3 -- orgColor
-    テキストラベル.Text = テキスト
-    テキストラベル.TextColor3 = Color3.fromRGB(76, 209, 55)
+    local orgText = textlabel.Text
+    local orgColor = textlabel.TextColor3
+    textlabel.Text = text
+    textlabel.TextColor3 = Color3.fromRGB(76, 209, 55)
     wait(0.8)
-    テキストラベル.Text = 元のテキスト -- orgText
-    テキストラベル.TextColor3 = 元の色 -- orgColor
+    textlabel.Text = orgText
+    textlabel.TextColor3 = orgColor
 end
 
--- 後で使用する重要な値 / important values for later
-local 閲覧中リモート -- lookingAt
-local 閲覧中引数 -- lookingAtArgs
-local 閲覧中ボタン -- lookingAtButton
+-- important values for later
+local lookingAt
+local lookingAtArgs
+local lookingAtButton
 
-コードコピー.MouseButton1Click:Connect(function()
-    if not 閲覧中リモート then return end
-    -- ユーザーがリモートを閲覧中の場合、コードのテキストをクリップボードにコピー / copy the code's text to clipboard if the user is looking at a remote
-    setclipboard(コードコメント.Text.. "\n\n"..コード.Text)
-    ボタン効果(コードコピー) -- ButtonEffect
+CopyCode.MouseButton1Click:Connect(function()
+    if not lookingAt then return end
+    -- copy the code's text to clipboard if the user is lookin at a remote
+    setclipboard(CodeComment.Text.. "\n\n"..Code.Text)
+    ButtonEffect(CopyCode)
 end)
 
-コード実行.MouseButton1Click:Connect(function()
-    -- ユーザーが閲覧中のリモートのインデックスを検索 / find the index of the remote the user is looking at
-    if 閲覧中リモート then
-        if タイプ確認(閲覧中リモート, "RemoteFunction") then
-            -- 引数を使用してリモートを発火 / fire remote with its args
-            閲覧中リモート:InvokeServer(unpack(閲覧中引数)) -- lookingAtArgs
-        elseif タイプ確認(閲覧中リモート, "RemoteEvent") then
-            閲覧中リモート:FireServer(unpack(閲覧中引数)) -- lookingAtArgs
-        end
+RunCode.MouseButton1Click:Connect(function()
+    -- find the index of the remote the user is looking at
+    if lookingAt then
+    if isA(lookingAt, "RemoteFunction") then
+        -- fire remote with its args
+        lookingAt:InvokeServer(unpack(lookingAtArgs))
+    elseif isA(lookingAt, "RemoteEvent") then
+        lookingAt:FireServer(unpack(lookingAtArgs))
+    end
     end
 end)
-
-スクリプトパスコピー.MouseButton1Click:Connect(function()
-    -- リモートインデックスを取得 / get remote index
-    local リモート = リモートを検索(閲覧中リモート, 閲覧中引数) -- FindRemote(lookingAt, lookingAtArgs)
-    if リモート and 閲覧中リモート then
-        -- そのインデックスのスクリプト名をコピー / copy the script name at that index
-        setclipboard(インスタンスの完全パスを取得(リモートスクリプト一覧[リモート])) -- remoteScripts[remote]
-        ボタン効果(スクリプトパスコピー) -- ButtonEffect
+CopyScriptPath.MouseButton1Click:Connect(function()
+    -- get remote index
+    local remote = FindRemote(lookingAt, lookingAtArgs)
+    if remote and lookingAt then
+        -- copy the script name at that index
+        setclipboard(GetFullPathOfAnInstance(remoteScripts[remote]))
+        ButtonEffect(CopyScriptPath)
     end
 end)
-
--- 逆コンパイルをキューに入れるためのブール値 / bool to make decompilations queue instead of running simultaneously
-local 逆コンパイル中 -- decompiling
-
-逆コンパイルコピー.MouseButton1Click:Connect(function()
-    local リモート = リモートを検索(閲覧中リモート, 閲覧中引数) -- FindRemote(lookingAt, lookingAtArgs)
+-- bool to make decompilations queue instead of running simultaneously
+local decompiling
+CopyDecompiled.MouseButton1Click:Connect(function()
+    local remote = FindRemote(lookingAt, lookingAtArgs)
     if not isSynapse() then
-        逆コンパイルコピー.Text = "このエクスプロイトは逆コンパイルをサポートしていません！ / This exploit doesn't support decompilation!"
-        逆コンパイルコピー.TextColor3 = Color3.fromRGB(232, 65, 24)
+        CopyDecompiled.Text = "このエクスプロイトは逆コンパイルをサポートしていません！\nThis exploit doesn't support decompilation!"
+        CopyDecompiled.TextColor3 = Color3.fromRGB(232, 65, 24)
         wait(1.6)
-        逆コンパイルコピー.Text = "逆コンパイルスクリプトをコピー / Copy decompiled script"
-        逆コンパイルコピー.TextColor3 = Color3.fromRGB(250, 251, 255)
+        CopyDecompiled.Text = "逆コンパイルしたスクリプトをコピー\nCopy decompiled script"
+        CopyDecompiled.TextColor3 = Color3.fromRGB(250, 251, 255)
         return
     end
-    if not 逆コンパイル中 and リモート and 閲覧中リモート then -- decompiling
-        逆コンパイル中 = true -- decompiling
+    if not decompiling and remote and lookingAt then
+        decompiling = true
 
-        -- ボタン効果 / button effect
+        -- button effect
         spawn(function()
             while true do
-                if 逆コンパイル中 == false then return end -- decompiling
-                逆コンパイルコピー.Text = "逆コンパイル中. / Decompiling."
+                if decompiling == false then return end
+                CopyDecompiled.Text = "逆コンパイル中.\nDecompiling."
                 wait(0.8)
-                if 逆コンパイル中 == false then return end -- decompiling
-                逆コンパイルコピー.Text = "逆コンパイル中.. / Decompiling.."
+                if decompiling == false then return end
+                CopyDecompiled.Text = "逆コンパイル中..\nDecompiling.."
                 wait(0.8)
-                if 逆コンパイル中 == false then return end -- decompiling
-                逆コンパイルコピー.Text = "逆コンパイル中... / Decompiling..."
+                if decompiling == false then return end
+                CopyDecompiled.Text = "逆コンパイル中...\nDecompiling..."
                 wait(0.8)
             end
         end)
 
-        -- リモートのリモートスクリプトを逆コンパイル / Decompile the remotescript of the remote
-        local 成功 = { pcall(function()setclipboard(decompile(リモートスクリプト一覧[リモート]))end) } -- remoteScripts[remote], success
-        逆コンパイル中 = false -- decompiling
-        if 成功[1] then -- success[1]
-            逆コンパイルコピー.Text = "逆コンパイルをコピーしました！ / Copied decompilation!"
-            逆コンパイルコピー.TextColor3 = Color3.fromRGB(76, 209, 55)
+        -- Decompile the remotescript of the remote
+        local success = { pcall(function()setclipboard(decompile(remoteScripts[remote]))end) }
+        decompiling = false
+        if success[1] then
+            CopyDecompiled.Text = "逆コンパイルをコピーしました！\nCopied decompilation!"
+            CopyDecompiled.TextColor3 = Color3.fromRGB(76, 209, 55)
         else
-            warn(成功[2], 成功[3]) -- success[2], success[3]
-            逆コンパイルコピー.Text = "逆コンパイルエラー！ F9でエラーを確認してください。 / Decompilation error! Check F9 to see the error."
-            逆コンパイルコピー.TextColor3 = Color3.fromRGB(232, 65, 24)
+            warn(success[2], success[3])
+            CopyDecompiled.Text = "逆コンパイルエラー！F9でエラーを確認してください。\nDecompilation error! Check F9 to see the error."
+            CopyDecompiled.TextColor3 = Color3.fromRGB(232, 65, 24)
         end
         wait(1.6)
-        逆コンパイルコピー.Text = "逆コンパイルスクリプトをコピー / Copy decompiled script"
-        逆コンパイルコピー.TextColor3 = Color3.fromRGB(250, 251, 255)
+        CopyDecompiled.Text = "逆コンパイルしたスクリプトをコピー\nCopy decompiled script"
+        CopyDecompiled.TextColor3 = Color3.fromRGB(250, 251, 255)
     end
 end)
 
-リモートブロック.MouseButton1Click:Connect(function()
-    -- ユーザーが閲覧中のリモートを検索し、ブロックされているか確認 / find the remote the user is looking at and check whether it's blocked or not
-    local ブロック済みリモート = table.find(ブロックリスト, 閲覧中リモート) -- bRemote
+BlockRemote.MouseButton1Click:Connect(function()
+    -- find the remote the user is looking at and check whether it's blocked or not
+    local bRemote = table.find(BlockList, lookingAt)
 
-    if 閲覧中リモート and not ブロック済みリモート then -- bRemote
-        -- リモートはブロックされていない、ブロックリストに追加 / remote isn't blocked, add it to the blocklist
-        table.insert(ブロックリスト, 閲覧中リモート)
-        リモートブロック.Text = "リモートのブロックを解除 / Unblock remote"
-        リモートブロック.TextColor3 = Color3.fromRGB(251, 197, 49)
-        local リモート = table.find(リモート一覧, 閲覧中リモート) -- remote
-        if リモート then
-            リモートボタン一覧[リモート].Parent.リモート名.TextColor3 = Color3.fromRGB(225, 177, 44) -- remoteButtons[remote]
+    if lookingAt and not bRemote then
+        -- remote isn't blocked, add it to the blocklist
+        table.insert(BlockList, lookingAt)
+        BlockRemote.Text = "リモートのブロックを解除\nUnblock remote"
+        BlockRemote.TextColor3 = Color3.fromRGB(251, 197, 49)
+        local remote = table.find(remotes, lookingAt)
+        if remote then
+            remoteButtons[remote].Parent.RemoteName.TextColor3 = Color3.fromRGB(225, 177, 44)
         end
-    elseif 閲覧中リモート and ブロック済みリモート then -- bRemote
-        -- リモートはブロック済み、ブロックを解除 / remote is blocked, remove from blocklist
-        table.remove(ブロックリスト, ブロック済みリモート) -- bRemote
-        リモートブロック.Text = "リモートの発火をブロック / Block remote from firing"
-        リモートブロック.TextColor3 = Color3.fromRGB(250, 251, 255)
-        local リモート = table.find(リモート一覧, 閲覧中リモート) -- remote
-        if リモート then
-            リモートボタン一覧[リモート].Parent.リモート名.TextColor3 = Color3.fromRGB(245, 246, 250) -- remoteButtons[remote]
-        end
-    end
-end)
-
-リモート無視.MouseButton1Click:Connect(function()
-    -- リモートがブロックされているか確認 / check if remote is ignored
-    local 無視済みリモート = table.find(無視リスト, 閲覧中リモート) -- iRemote
-    if 閲覧中リモート and not 無視済みリモート then -- iRemote
-        table.insert(無視リスト, 閲覧中リモート)
-        リモート無視.Text = "リモートの無視を停止 / Stop ignoring remote"
-        リモート無視.TextColor3 = Color3.fromRGB(127, 143, 166)
-        local リモート = table.find(リモート一覧, 閲覧中リモート) -- remote
-        if リモート then
-            リモートボタン一覧[リモート].Parent.リモート名.TextColor3 = Color3.fromRGB(127, 143, 166) -- remoteButtons[remote]
-        end
-    elseif 閲覧中リモート and 無視済みリモート then -- iRemote
-        table.remove(無視リスト, 無視済みリモート) -- iRemote
-        リモート無視.Text = "リモートを無視 / Ignore remote"
-        リモート無視.TextColor3 = Color3.fromRGB(250, 251, 255)
-        local リモート = table.find(リモート一覧, 閲覧中リモート) -- remote
-        if リモート then
-            リモートボタン一覧[リモート].Parent.リモート名.TextColor3 = Color3.fromRGB(245, 246, 250) -- remoteButtons[remote]
+    elseif lookingAt and bRemote then
+        -- remote is
+        table.remove(BlockList, bRemote)
+        BlockRemote.Text = "リモートの発火をブロック\nBlock remote from firing"
+        BlockRemote.TextColor3 = Color3.fromRGB(250, 251, 255)
+        local remote = table.find(remotes, lookingAt)
+        if remote then
+            remoteButtons[remote].Parent.RemoteName.TextColor3 = Color3.fromRGB(245, 246, 250)
         end
     end
 end)
 
-無限ループ生成.MouseButton1Click:Connect(function()
-    if not 閲覧中リモート then return end
-    setclipboard("while wait() do\n   "..コード.Text.."\nend")
-    ボタン効果(無限ループ生成) -- ButtonEffect
+IgnoreRemote.MouseButton1Click:Connect(function()
+    -- check if remote is blocked
+    local iRemote = table.find(IgnoreList, lookingAt)
+    if lookingAt and not iRemote then
+        table.insert(IgnoreList, lookingAt)
+        IgnoreRemote.Text = "リモートの無視を停止\nStop ignoring remote"
+        IgnoreRemote.TextColor3 = Color3.fromRGB(127, 143, 166)
+        local remote = table.find(remotes, lookingAt)
+        local unstacked = table.find(unstacked, lookingAt)
+        if remote then
+            remoteButtons[remote].Parent.RemoteName.TextColor3 = Color3.fromRGB(127, 143, 166)
+        end
+    elseif lookingAt and iRemote then
+        table.remove(IgnoreList, iRemote)
+        IgnoreRemote.Text = "リモートを無視\nIgnore remote"
+        IgnoreRemote.TextColor3 = Color3.fromRGB(250, 251, 255)
+        local remote = table.find(remotes, lookingAt)
+        if remote then
+            remoteButtons[remote].Parent.RemoteName.TextColor3 = Color3.fromRGB(245, 246, 250)
+        end
+    end
 end)
 
-クリア.MouseButton1Click:Connect(function()
-    for i, v in pairs(リモートスクロールフレーム:GetChildren()) do -- RemoteScrollFrame
+WhileLoop.MouseButton1Click:Connect(function()
+    if not lookingAt then return end
+    setclipboard("while wait() do\n   "..Code.Text.."\nend")
+    ButtonEffect(WhileLoop)
+end)
+
+Clear.MouseButton1Click:Connect(function()
+    for i, v in pairs(RemoteScrollFrame:GetChildren()) do
         if i > 1 then 
-            v:Destroy()
+        v:Destroy()
         end
     end
-    for i, v in pairs(接続一覧) do -- connections
+    for i, v in pairs(connections) do
         v:Disconnect()
     end
-    -- すべてをリセット / reset everything
-    ボタンオフセット = -25 -- buttonOffset
-    スクロールサイズオフセット = 0 -- scrollSizeOffset
-    リモート一覧 = {} -- remotes
-    リモート引数 = {} -- remoteArgs
-    リモートボタン一覧 = {} -- remoteButtons
-    リモートスクリプト一覧 = {} -- remoteScripts
-    無視リスト = {} -- IgnoreList
-    ブロックリスト = {} -- BlockList
-    リモートスクロールフレーム.CanvasSize = UDim2.new(0, 0, 0, 287)
-    非積み上げリスト = {} -- unstacked
-    接続一覧 = {} -- connections
+    -- reset everything
+    buttonOffset = -25
+    scrollSizeOffset = 0
+    remotes = {}
+    remoteArgs = {}
+    remoteButtons = {}
+    remoteScripts = {}
+    IgnoreList = {}
+    BlockList = {}
+    IgnoreList = {}
+    RemoteScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 287)
+    unstacked = {}
+    connections = {}
 
-    ボタン効果(クリア, "クリアしました！ / Cleared!") -- ButtonEffect
+    ButtonEffect(Clear, "クリアしました！\nCleared!")
 end)
 
-積み上げ無効.MouseButton1Click:Connect(function()
-    if 閲覧中リモート then
-        local 非積み上げ済み = table.find(非積み上げリスト, 閲覧中リモート) -- isUnstacked
-        if 非積み上げ済み then -- isUnstacked
-            table.remove(非積み上げリスト, 非積み上げ済み) -- isUnstacked
-            積み上げ無効.Text = "新しい引数で発火されたら積み上げない / Unstack remote when fired with new args"
-            積み上げ無効.TextColor3 = Color3.fromRGB(245, 246, 250)
+DoNotStack.MouseButton1Click:Connect(function()
+    if lookingAt then
+        local isUnstacked = table.find(unstacked, lookingAt)
+        if isUnstacked then
+            table.remove(unstacked, isUnstacked)
+            DoNotStack.Text = "新しい引数で発火時にスタックを解除\nUnstack remote when fired with new args"
+            DoNotStack.TextColor3 = Color3.fromRGB(245, 246, 250)
         else
-            table.insert(非積み上げリスト, 閲覧中リモート)
-            積み上げ無効.Text = "リモートを積み上げる / Stack remote"
-            積み上げ無効.TextColor3 = Color3.fromRGB(251, 197, 49)
+            table.insert(unstacked, lookingAt)
+            DoNotStack.Text = "リモートをスタック\nStack remote"
+            DoNotStack.TextColor3 = Color3.fromRGB(251, 197, 49)
         end
     end
 end)
 
-local function 長さ(テーブル) -- len(t)
+local function len(t)
     local n = 0
 
-    for _ in pairs(テーブル) do
+    for _ in pairs(t) do
         n = n + 1
     end
     return n
 end
 
--- テーブルを文字列に変換、引数のフォーマットに便利 / converts tables to a string, good for formatting arguments
-local function テーブルを文字列に変換(引数) -- convertTableToString(args)
-    local 文字列 = "" -- string
-    local インデックス = 1 -- index
-    for i, v in pairs(引数) do
+-- converts tables to a string, good for formatting arguments
+local function convertTableToString(args)
+    local string = ""
+    local index = 1
+    for i,v in pairs(args) do
         if type(i) == "string" then
-            文字列 = 文字列 .. '["' .. tostring(i) .. '"] = ' -- string
+            string = string .. '["' .. tostring(i) .. '"] = '
         elseif type(i) == "userdata" and typeof(i) ~= "Instance" then
-            文字列 = 文字列 .. "[" .. typeof(i) .. ".new(" .. tostring(i) .. ")] = " -- string
+            string = string .. "[" .. typeof(i) .. ".new(" .. tostring(i) .. ")] = "
         elseif type(i) == "userdata" then
-            文字列 = 文字列 .. "[" .. インスタンスの完全パスを取得(i) .. "] = " -- string
+            string = string .. "[" .. GetFullPathOfAnInstance(i) .. "] = "
         end
         if v == nil then
-            文字列 = 文字列 ..  "nil" -- string
+            string = string ..  "nil"
         elseif typeof(v) == "Instance"  then
-            文字列 = 文字列 .. インスタンスの完全パスを取得(v) -- string
+            string = string .. GetFullPathOfAnInstance(v)
         elseif type(v) == "number" or type(v) == "function" then
-            文字列 = 文字列 .. tostring(v) -- string
+            string = string .. tostring(v)
         elseif type(v) == "userdata" then
-            文字列 = 文字列 .. typeof(v)..".new("..tostring(v)..")" -- string
+            string = string .. typeof(v)..".new("..tostring(v)..")"
         elseif type(v) == "string" then
-            文字列 = 文字列 .. [["]]..v..[["]] -- string
+            string = string .. [["]]..v..[["]]
         elseif type(v) == "table" then
-            文字列 = 文字列 .. "{" -- string
-            文字列 = 文字列 .. テーブルを文字列に変換(v) -- convertTableToString
-            文字列 = 文字列 .. "}" -- string
+            string = string .. "{"
+            string = string .. convertTableToString(v)
+            string = string .. "}"
         elseif type(v) == 'boolean' then
             if v then
-                文字列 = 文字列..'true' -- string
+                string = string..'true'
             else
-                文字列 = 文字列..'false' -- string
+                string = string..'false'
             end
         end
-        if 長さ(引数) > 1 and インデックス < 長さ(引数) then -- len(args)
-            文字列 = 文字列 .. "," -- string
+        if len(args) > 1 and index < len(args) then
+            string =  string .. ","
         end
-        インデックス = インデックス + 1
+        index = index + 1
     end
-    return 文字列 -- string
+return string
 end
-
-戻り値コピー.MouseButton1Click:Connect(function()
-    local リモート = リモートを検索(閲覧中リモート, 閲覧中引数) -- FindRemote(lookingAt, lookingAtArgs)
-    if 閲覧中リモート and リモート then
-        if タイプ確認(閲覧中リモート, "RemoteFunction") then
-            -- リモートを実行して戻り値をコピー、簡単な処理 / execute the remote and copy the return value, pretty easy stuff
-            local 結果 = リモート一覧[リモート]:InvokeServer(unpack(リモート引数[リモート])) -- remotes[remote], remoteArgs[remote], result
-            setclipboard(テーブルを文字列に変換(table.pack(結果))) -- convertTableToString
-            ボタン効果(戻り値コピー) -- ButtonEffect
-        end
+CopyReturn.MouseButton1Click:Connect(function()
+    local remote = FindRemote(lookingAt, lookingAtArgs)
+    if lookingAt and remote then
+    if isA(lookingAt, "RemoteFunction") then
+        -- execute the remote and copy the return value, pretty easy stuff
+        local result = remotes[remote]:InvokeServer(unpack(remoteArgs[remote]))
+        setclipboard(convertTableToString(table.pack(result)))
+        ButtonEffect(CopyReturn)
+    end
     end
 end)
 
--- リモートスクロールフレームに子が追加されたときの検出とMouseButton1Clickシグナルの追加 / detect when a child is added to the remotescrollframe and add a mousebutton1click signal
-リモートスクロールフレーム.ChildAdded:Connect(function(子) -- child
-    -- 後にユーザーがボタンを押したときに役立つすべての重要な情報を取得 / get all essential info that will be useful later when the user presses the button
-    local リモート = リモート一覧[#リモート一覧] -- remote
-    local 引数 = リモート引数[#リモート一覧] -- args
-    local イベント = true -- event
-    local 発火関数 = ":FireServer(" -- fireFunction
-    if タイプ確認(リモート, "RemoteFunction") then
-        イベント = false -- event
-        発火関数 = ":InvokeServer(" -- fireFunction
+-- detect when a child is added to the remotescrollframe and add a mousebutton1click signal (doing this in the addToList function causes problems since it's in a roblox thread)
+RemoteScrollFrame.ChildAdded:Connect(function(child)
+    -- get all essential info that will be useful later when the user presses the button
+    local remote = remotes[#remotes]
+    local args = remoteArgs[#remotes]
+    local event = true
+    local fireFunction = ":FireServer("
+    if isA(remote, "RemoteFunction") then
+        event = false
+        fireFunction = ":InvokeServer("
     end
-    local 接続 = 子.MouseButton1Click:Connect(function() -- connection
+    local connection = child.MouseButton1Click:Connect(function()
         
-        情報ヘッダーテキスト.Text = "情報: "..リモート.Name.." / Info: "..リモート.Name -- Info: RemoteFunction
-        if イベント then -- event
-            情報ボタンスクロール.CanvasSize = UDim2.new(0, 0, 1, 0) -- InfoButtonsScroll
+        InfoHeaderText.Text = "情報: "..remote.Name.."\nInfo: "..remote.Name
+        if event then 
+            InfoButtonsScroll.CanvasSize = UDim2.new(0, 0, 1, 0)
         else
-            -- リモート関数の場合は、実行して戻り値をコピーボタンのスペースを作成 / make space for the execute and copy return button since it's a remote function
-            情報ボタンスクロール.CanvasSize = UDim2.new(0, 0, 1.1, 0) -- InfoButtonsScroll
+            -- make space for the execute and copy return button since it's a remote function
+            InfoButtonsScroll.CanvasSize = UDim2.new(0, 0, 1.1, 0)
         end
-        メインフレーム.Size = UDim2.new(0, 565, 0, 35)
-        情報フレーム開く.Text = ">"
-        情報フレーム.Visible = true
-        コード.Text = インスタンスの完全パスを取得(リモート)..発火関数..テーブルを文字列に変換(引数)..")" -- GetFullPathOfAnInstance, fireFunction, convertTableToString
-        -- テキストサイズを取得し、コードボックスのサイズを更新 / gets text size and updates code box's size accordingly
-        local テキストサイズ = テキストサービス:GetTextSize(コード.Text, コード.TextSize, コード.Font, Vector2.new(math.huge, math.huge)) -- textsize
-        コードフレーム.CanvasSize = UDim2.new(0, テキストサイズ.X + 11, 2, 0) -- textsize
-        閲覧中リモート = リモート -- lookingAt
-        閲覧中引数 = 引数 -- lookingAtArgs
-        閲覧中ボタン = 子.数字 -- lookingAtButton = child.Number
+        mainFrame.Size = UDim2.new(0, 565, 0, 35)
+        OpenInfoFrame.Text = ">"
+        InfoFrame.Visible = true
+        Code.Text = GetFullPathOfAnInstance(remote)..fireFunction..convertTableToString(args)..")"
+        -- gets text size and updates code box's size accordingly
+        local textsize = TextService:GetTextSize(Code.Text, Code.TextSize, Code.Font, Vector2.new(math.huge, math.huge))
+        CodeFrame.CanvasSize = UDim2.new(0, textsize.X + 11, 2, 0)
+        lookingAt = remote
+        lookingAtArgs = args
+        lookingAtButton = child.Number
 
-        -- リモートは無視/ブロックされていますか？その場合、それらのボタンを変更 / is the remote ignored/blocked? in that case, change those buttons
-        local ブロック済み = table.find(ブロックリスト, リモート) -- blocked
-        if ブロック済み then -- blocked
-            リモートブロック.Text = "リモートのブロックを解除 / Unblock remote"
-            リモートブロック.TextColor3 = Color3.fromRGB(251, 197, 49)
+        -- is the remote ignored/blocked? in that case, change those buttons
+        local blocked = table.find(BlockList, remote)
+        if blocked then
+            BlockRemote.Text = "リモートのブロックを解除\nUnblock remote"
+            BlockRemote.TextColor3 = Color3.fromRGB(251, 197, 49)
         else
-            リモートブロック.Text = "リモートの発火をブロック / Block remote from firing"
-            リモートブロック.TextColor3 = Color3.fromRGB(250, 251, 255)
+            BlockRemote.Text = "リモートの発火をブロック\nBlock remote from firing"
+            BlockRemote.TextColor3 = Color3.fromRGB(250, 251, 255)
         end
-        local 無視済みリモート = table.find(無視リスト, 閲覧中リモート) -- iRemote
-        if 無視済みリモート then -- iRemote
-            リモート無視.Text = "リモートの無視を停止 / Stop ignoring remote"
-            リモート無視.TextColor3 = Color3.fromRGB(127, 143, 166)
+        local iRemote = table.find(IgnoreList, lookingAt)
+        if iRemote then
+            IgnoreRemote.Text = "リモートの無視を停止\nStop ignoring remote"
+            IgnoreRemote.TextColor3 = Color3.fromRGB(127, 143, 166)
         else
-            リモート無視.Text = "リモートを無視 / Ignore remote"
-            リモート無視.TextColor3 = Color3.fromRGB(250, 251, 255)
+            IgnoreRemote.Text = "リモートを無視\nIgnore remote"
+            IgnoreRemote.TextColor3 = Color3.fromRGB(250, 251, 255)
         end
-        情報フレーム開いている = true -- InfoFrameOpen
+        InfoFrameOpen = true
     end)
-    -- 接続テーブルに挿入して、すべての接続を切断できるようにする / insert them into a connections table in order to be able to disconnect all of them
-    table.insert(接続一覧, 接続) -- connections
+    -- insert them into a connections table in order to be able to disconnect all of them
+    table.insert(connections, connection)
 end)
 
--- メイン関数：リストにリモートを追加 / Main function: add a remote to the list
-function リストに追加(イベント, リモート, ...) -- addToList(event, remote, ...)
-    -- これはゲームスレッドで実行されているため、スレッドコンテキストを設定 / set thread context since this is running in a game thread
-    local 現在のID = (get_thread_context or syn.get_thread_identity)() -- currentId
+
+-- Main function: add a remote to the list (event: is it a RemoteEvent?, remote: the remote fired, ...: the args)
+function addToList(event, remote, ...)
+    -- set thread context since this is running in a game thread
+    local currentId = (get_thread_context or syn.get_thread_identity)()
     ;(set_thread_context or syn.set_thread_identity)(7)
-    if not リモート then return end -- remote
+    if not remote then return end
 
-    -- 重要な変数 / important variables
-    local 名前 = リモート.Name -- name
-    local 引数 = {...} -- args
+    -- important variables
+    local name = remote.Name
+    local args = {...}
 
-    -- これらの引数でこの特定のリモートを検索するFindRemote関数を呼び出す / call the FindRemote function to find this specific remote with these args
-    local 索引 = リモートを検索(リモート, 引数) -- i
+    -- call the FindRemote function to find this specific remote with these args
+    local i = FindRemote(remote, args)
 
-    -- リモートが見つからなかった場合 / if the remote hasn't been found
-    if not 索引 then -- i
-        -- リモートをリモートテーブルに追加（重要） / add remote to remotes table (important)
-        table.insert(リモート一覧, リモート) -- remotes
+    -- if the remote hasn't been found
+    if not i then
+        -- add remote to remotes table (important)
+        table.insert(remotes, remote)
 
-        local リモートボタン = 複製(リモートボタン) -- rButton
-        -- リモートに関するすべての有用な情報をテーブルに追加 / add all useful info about the remote to tables
-        リモートボタン一覧[#リモート一覧] = リモートボタン.数字 -- remoteButtons
-        リモート引数[#リモート一覧] = 引数 -- remoteArgs
-        リモートスクリプト一覧[#リモート一覧] = (isSynapse() and getcallingscript() or rawget(getfenv(0), "script")) -- remoteScripts
+        local rButton = clone(RemoteButton)
+        -- add all useful info about the remote to tables
+        remoteButtons[#remotes] = rButton.Number
+        remoteArgs[#remotes] = args
+        remoteScripts[#remotes] = (isSynapse() and getcallingscript() or rawget(getfenv(0), "script"))
 
-        -- リモートボタンの小さな複製を作成 / clone a little baby of the remotebutton
-        リモートボタン.Parent = リモートスクロールフレーム -- rButton
-        リモートボタン.Visible = true -- rButton
-        local 数字テキストサイズ = テキストサイズ取得(テキストサービス, リモートボタン.数字.Text, リモートボタン.数字.TextSize, リモートボタン.数字.Font, Vector2.new(math.huge, math.huge)) -- numberTextsize
-        リモートボタン.リモート名.Position = UDim2.new(0, 数字テキストサイズ.X + 10, 0, 0) -- numberTextsize
-        if 名前 then -- name
-            リモートボタン.リモート名.Text = 名前 -- rButton
+        -- clone a little baby of the remotebutton
+        rButton.Parent = RemoteScrollFrame
+        rButton.Visible = true
+        local numberTextsize = getTextSize(TextService, rButton.Number.Text, rButton.Number.TextSize, rButton.Number.Font, Vector2.new(math.huge, math.huge))
+        rButton.RemoteName.Position = UDim2.new(0,numberTextsize.X + 10, 0, 0)
+        if name then
+            rButton.RemoteName.Text = name
         end
-        if not イベント then -- event
-            リモートボタン.リモートアイコン.Image = "http://www.roblox.com/asset/?id=413369623" -- rButton
+        if not event then
+            rButton.RemoteIcon.Image = "http://www.roblox.com/asset/?id=413369623"
         end
-        ボタンオフセット = ボタンオフセット + 35 -- buttonOffset
-        リモートボタン.Position = UDim2.new(0.0912411734, 0, 0, ボタンオフセット) -- rButton, buttonOffset
-        if #リモート一覧 > 8 then -- remotes
-            スクロールサイズオフセット = スクロールサイズオフセット + 35 -- scrollSizeOffset
-            リモートスクロールフレーム.CanvasSize = UDim2.new(0, 0, 0, スクロールサイズオフセット) -- scrollSizeOffset
+        buttonOffset = buttonOffset + 35
+        rButton.Position = UDim2.new(0.0912411734, 0, 0, buttonOffset)
+        if #remotes > 8 then
+            scrollSizeOffset = scrollSizeOffset + 35
+            RemoteScrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollSizeOffset)
         end
     else
-        -- リモートが見つかった、リモートのボタンの数字テキストを増加 / the remote has been found, increment the remote's button's number text
-        リモートボタン一覧[索引].Text = tostring(tonumber(リモートボタン一覧[索引].Text) + 1) -- remoteButtons[i]
-        -- 数字テキストのピクセルサイズを取得し、それに応じて名前の位置を変更 / get the size in pixels of the number text and change the name's position accordingly
-        local 数字テキストサイズ = テキストサイズ取得(テキストサービス, リモートボタン一覧[索引].Text, リモートボタン一覧[索引].TextSize, リモートボタン一覧[索引].Font, Vector2.new(math.huge, math.huge)) -- numberTextsize
-        リモートボタン一覧[索引].Parent.リモート名.Position = UDim2.new(0, 数字テキストサイズ.X + 10, 0, 0) -- remoteButtons[i], numberTextsize
-        リモートボタン一覧[索引].Parent.リモート名.Size = UDim2.new(0, 149 - 数字テキストサイズ.X, 0, 26) -- remoteButtons[i], numberTextsize
+        -- the remote has been found, increment the remote's button's number text
+        remoteButtons[i].Text = tostring(tonumber(remoteButtons[i].Text) + 1)
+        -- get the size in pixels of the number text and change the name's position accordingly
+        local numberTextsize = getTextSize(TextService, remoteButtons[i].Text, remoteButtons[i].TextSize, remoteButtons[i].Font, Vector2.new(math.huge, math.huge))
+        remoteButtons[i].Parent.RemoteName.Position = UDim2.new(0,numberTextsize.X + 10, 0, 0)
+        remoteButtons[i].Parent.RemoteName.Size = UDim2.new(0, 149 -numberTextsize.X, 0, 26)
 
-        -- 引数を更新 / update the arguments
-        リモート引数[索引] = 引数 -- remoteArgs[i]
+        -- update the arguments
+        remoteArgs[i] = args
 
-        -- プレイヤーがそれを見ている場合はコードボックスを更新 / update the codebox if the player is looking at it
-        if 閲覧中リモート and 閲覧中リモート == リモート and 閲覧中ボタン == リモートボタン一覧[索引] and 情報フレーム.Visible then
-            local 発火関数 = ":FireServer(" -- fireFunction
-            if タイプ確認(リモート, "RemoteFunction") then
-                発火関数 = ":InvokeServer(" -- fireFunction
+        -- update the codebox if the player is looking at it
+        if lookingAt and lookingAt == remote and lookingAtButton == remoteButtons[i] and InfoFrame.Visible then
+            local fireFunction = ":FireServer("
+            if isA(remote, "RemoteFunction") then
+                fireFunction = ":InvokeServer("
             end
-            コード.Text = インスタンスの完全パスを取得(リモート)..発火関数..テーブルを文字列に変換(リモート引数[索引])..")" -- GetFullPathOfAnInstance, fireFunction, convertTableToString, remoteArgs[i]
-            local テキストサイズ = テキストサイズ取得(テキストサービス, コード.Text, コード.TextSize, コード.Font, Vector2.new(math.huge, math.huge)) -- textsize
-            コードフレーム.CanvasSize = UDim2.new(0, テキストサイズ.X + 11, 2, 0) -- textsize
+            Code.Text = GetFullPathOfAnInstance(remote)..fireFunction..convertTableToString(remoteArgs[i])..")"
+            local textsize = getTextSize(TextService, Code.Text, Code.TextSize, Code.Font, Vector2.new(math.huge, math.huge))
+            CodeFrame.CanvasSize = UDim2.new(0, textsize.X + 11, 2, 0)
         end
     end
-    ;(set_thread_context or syn.set_thread_identity)(現在のID) -- currentId
+    ;(set_thread_context or syn.set_thread_identity)(currentId)
 end
 
-local 古いイベント -- OldEvent
-古いイベント = hookfunction(Instance.new("RemoteEvent").FireServer, function(自身, ...) -- Self
-    if not checkcaller() and table.find(ブロックリスト, 自身) then -- Self
+local OldEvent
+OldEvent = hookfunction(Instance.new("RemoteEvent").FireServer, function(Self, ...)
+    if not checkcaller() and table.find(BlockList, Self) then
         return
-    elseif table.find(無視リスト, 自身) then -- Self
-        -- 無視されている場合はaddToListを呼び出さない / if ignored then don't call the addToList
-        return 古いイベント(自身, ...) -- OldEvent(Self, ...)
+    elseif table.find(IgnoreList, Self) then
+        --if ignored then don't call the addToList
+        return OldEvent(Self, ...)
     end
-    リストに追加(true, 自身, ...) -- addToList(true, Self, ...)
+    addToList(true, Self, ...)
 end)
 
-local 古い関数 -- OldFunction
-古い関数 = hookfunction(Instance.new("RemoteFunction").InvokeServer, function(自身, ...) -- Self
-    if not checkcaller() and table.find(ブロックリスト, 自身) then -- Self
+local OldFunction
+OldFunction = hookfunction(Instance.new("RemoteFunction").InvokeServer, function(Self, ...)
+    if not checkcaller() and table.find(BlockList, Self) then
         return
-    elseif table.find(無視リスト, 自身) then -- Self
-        -- 無視されている場合はaddToListを呼び出さない / if ignored then don't call the addToList
-        return 古い関数(自身, ...) -- OldFunction(Self, ...)
+    elseif table.find(IgnoreList, Self) then
+        --if ignored then don't call the addToList
+        return OldFunction(Self, ...)
     end
-    リストに追加(false, 自身, ...) -- addToList(false, Self, ...)
+    addToList(false, Self, ...)
 end)
 
--- ゲームnamecallフック（基本的にスクリプトがリモートを検出できるようにする） / game namecall hook (makes the script detect the remotes, basically)
-local 古いNamecall -- OldNamecall
-古いNamecall = hookmetamethod(game,"__namecall",function(...)
-    local 引数 = {...} -- args
-    local 自身 = 引数[1] -- Self
-    local メソッド = (getnamecallmethod or get_namecall_method)() -- method
-    if メソッド == "FireServer" and タイプ確認(自身, "RemoteEvent")  then -- method, Self
-        -- リモートがブロックされていて、リモートがゲームによって発火されている場合はブロック / if the remote is blocked and the remote is being fired by the game then block it
-        if not checkcaller() and table.find(ブロックリスト, 自身) then -- Self
+-- game namecall hook (makes the script detect the remotes, basically)
+local OldNamecall
+OldNamecall = hookmetamethod(game,"__namecall",function(...)
+    local args = {...}
+    local Self = args[1]
+    local method = (getnamecallmethod or get_namecall_method)()
+    if method == "FireServer" and isA(Self, "RemoteEvent")  then
+        -- if the remote is blocked and the remote is being fired by the game then block it
+        if not checkcaller() and table.find(BlockList, Self) then
             return
-        elseif table.find(無視リスト, 自身) then -- Self
-            -- 無視されている場合はaddToListを呼び出さない / if ignored then don't call the addToList
-            return 古いNamecall(...) -- OldNamecall
+        elseif table.find(IgnoreList, Self) then
+            --if ignored then don't call the addToList
+            return OldNamecall(...)
         end
-        リストに追加(true, ...) -- addToList
-    elseif メソッド == "InvokeServer" and タイプ確認(自身, 'RemoteFunction') then -- method, Self
-        if not checkcaller() and table.find(ブロックリスト, 自身) then -- Self
+        addToList(true, ...)
+    elseif method == "InvokeServer" and isA(Self, 'RemoteFunction') then
+        if not checkcaller() and table.find(BlockList, Self) then
             return
-        elseif table.find(無視リスト, 自身) then -- Self
-            return 古いNamecall(...) -- OldNamecall
+        elseif table.find(IgnoreList, Self) then
+            return OldNamecall(...)
         end
-        リストに追加(false, ...) -- addToList
+        addToList(false, ...)
     end
 
-    return 古いNamecall(...) -- OldNamecall
+    return OldNamecall(...)
 end)
